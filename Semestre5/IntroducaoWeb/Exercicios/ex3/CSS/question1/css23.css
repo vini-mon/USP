@@ -1,0 +1,38 @@
+.container{
+
+    background-color: red;
+    width: 500px;
+    margin: 0 auto;
+
+}
+
+.box1{
+
+    background-color: green;
+    width: 150px;
+    height: 150px;
+    float: left;
+
+}
+
+.box2{
+
+    background-color: blue;
+    width: 150px;
+    height: 150px;
+    float: right;
+
+}
+
+.container::before, .container::after{
+
+    content: '';
+    display: table;
+
+}
+
+.container::after{
+
+    clear: both;
+
+}

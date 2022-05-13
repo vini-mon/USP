@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+
+        <meta charset="UTF-8" />
+
+    </head>
+
+    <body>
+
+        <fieldset>
+
+            <legend>Informações pessoais</legend>
+
+            <form id="form-cadastro" enctype="application/x-www-form-urlencoded">
+
+                Email: <br/>
+                <input type="email" name="email"  /><br/>
+                <br/>
+                <input type="submit" name="botao" formenctype="application/x-www-form-urlencoded" value="enviar" formaction="pagina_fantasia.html" formmethod="GET" />
+                <input type="submit" name="enviar-email" value="Enviar por email" formaction="enviar.php" formmethod="POST" formnovalidate />
+                
+            </form>
+
+            Seu belo nome:<br/>
+            <input type="text" name="nome" form="form-cadastro">
+
+        </fieldset>
+        
+    </body>
+
+</html>
