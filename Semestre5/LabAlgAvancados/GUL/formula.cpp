@@ -21,13 +21,13 @@ int main(){
 
     int n;
     int max, min;
-    int count;
     
     string input;
     string reader;
 
     int insert;
     int insert2;
+
     vector<int>numbers;
     vector<int>numbers2;
 
@@ -38,9 +38,9 @@ int main(){
 
     for( int i = 0 ; i < n ; i++ ){
 
-        count = 0;
-
         insert = 0;
+        min = 0;
+        max = 0;
 
         reader.insert(0, "00");
 
@@ -138,7 +138,6 @@ int main(){
 
         for( int j = 0 ; j < insert-1 ; j++ ){
 
-
             if( op[j] == 0 ){
 
                 result = numbers[j] + numbers[j+1];
@@ -160,9 +159,19 @@ int main(){
         
         insert = insert2;
 
+        numbers.clear();
+
         for( int p = 0 ; p < numbers2.size() ; p++ ){
 
             numbers.push_back(numbers2[p]);
+
+        }
+
+        op.clear();
+
+        for( int p = 0 ; p < op2.size() ; p++ ){
+
+            op.push_back(op2[p]);
 
         }
 
@@ -193,7 +202,6 @@ int main(){
 
         for( int j = 0 ; j < insert-1 ; j++ ){
 
-
             if( op[j] == 1 ){
 
                 result = numbers[j] * numbers[j+1];
@@ -216,6 +224,11 @@ int main(){
         cout << "The maximum and minimum are " << max << " and " << min << "." << endl;
 
         input.clear();
+        op.clear();
+        op2.clear();
+        numbers.clear();
+        numbers2.clear();
+        reader.clear();
 
     }
     
@@ -227,5 +240,9 @@ int main(){
 1+2*3*4+5
 4*18+14+7*10
 3+11+4*1*13*12*8+3*3+8
+
+== 81 30
+== 1560 156
+== 339768 5023
 
 */
