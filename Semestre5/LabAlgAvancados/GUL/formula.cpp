@@ -4,14 +4,16 @@
 
 using namespace std;
 
-vector<int> fix( vector<int> numbers, int j, int fim ){
+vector<unsigned long long int> fix( vector<unsigned long long int> numbers, int start ){
 
-    for(int i = j ; i < fim ; i++){
+    for(int i = start ; i < (int) numbers.size()-1 ; i++){
 
         numbers[i] = numbers[i+1];
         numbers[i+1] = '\0';
 
     }
+
+    numbers.pop_back();
 
     return numbers;
 
@@ -20,7 +22,7 @@ vector<int> fix( vector<int> numbers, int j, int fim ){
 int main(){
 
     int n;
-    int max, min;
+    unsigned long long int max, min;
     
     string input;
     string reader;
@@ -28,11 +30,13 @@ int main(){
     int insert;
     int insert2;
 
-    vector<int>numbers;
-    vector<int>numbers2;
+    unsigned long long int result = 0;
 
-    vector<int>op;
-    vector<int>op2;
+    vector<unsigned long long int>numbers;
+    vector<unsigned long long int>numbers2;
+
+    vector<unsigned long long int>op;
+    vector<unsigned long long int>op2;
 
     cin >> n;
 
@@ -46,7 +50,7 @@ int main(){
 
         cin >> input;
 
-        for( int j = 0 ; j < input.length() ; j++ ){
+        for( int j = 0 ; j < (int) input.length() ; j++ ){
             
             if( input[j] != '+' && input[j] != '*' ){
 
@@ -87,7 +91,11 @@ int main(){
         numbers.push_back(atoi(reader.c_str()));
 
         insert++;
-/* 
+
+
+
+/*
+
         for( int j = 0 ; j < insert ; j++ ){
 
             cout << j << " " << numbers[j] << endl;
@@ -99,23 +107,26 @@ int main(){
             cout << j << " " << op[j] << endl;
 
         }
- */
+ 
+*/
+
+
+
+
 
         insert2 = insert;
 
-        for( int p = 0 ; p < numbers.size() ; p++ ){
+        for( int p = 0 ; p < (int) numbers.size() ; p++ ){
 
             numbers2.push_back(numbers[p]);
 
         }
 
-        for( int p = 0 ; p < op.size() ; p++ ){
+        for( int p = 0 ; p < (int) op.size() ; p++ ){
 
             op2.push_back(op[p]);
 
         }
-
-        int result;
 
         for( int j = 0 ; j < insert-1 ; j++ ){
 
@@ -125,8 +136,9 @@ int main(){
 
                 numbers[j] = result;
 
-                numbers = fix(numbers, j+1, insert);
-                op = fix(op, j, insert);
+                numbers = fix(numbers, j+1);
+
+                op = fix(op, j);
 
                 j--;
 
@@ -136,6 +148,7 @@ int main(){
 
         }
 
+
         for( int j = 0 ; j < insert-1 ; j++ ){
 
             if( op[j] == 0 ){
@@ -144,8 +157,8 @@ int main(){
 
                 numbers[j] = result;
 
-                numbers = fix(numbers, j+1, insert);
-                op = fix(op, j, insert);
+                numbers = fix(numbers, j+1);
+                op = fix(op, j);
 
                 j--;
 
@@ -161,7 +174,7 @@ int main(){
 
         numbers.clear();
 
-        for( int p = 0 ; p < numbers2.size() ; p++ ){
+        for( int p = 0 ; p < (int) numbers2.size() ; p++ ){
 
             numbers.push_back(numbers2[p]);
 
@@ -169,13 +182,7 @@ int main(){
 
         op.clear();
 
-        for( int p = 0 ; p < op2.size() ; p++ ){
-
-            op.push_back(op2[p]);
-
-        }
-
-        for( int p = 0 ; p < op2.size() ; p++ ){
+        for( int p = 0 ; p < (int) op2.size() ; p++ ){
 
             op.push_back(op2[p]);
 
@@ -189,8 +196,8 @@ int main(){
 
                 numbers[j] = result;
 
-                numbers = fix(numbers, j+1, insert);
-                op = fix(op, j, insert);
+                numbers = fix(numbers, j+1);
+                op = fix(op, j);
 
                 j--;
 
@@ -200,6 +207,7 @@ int main(){
 
         }
 
+
         for( int j = 0 ; j < insert-1 ; j++ ){
 
             if( op[j] == 1 ){
@@ -208,8 +216,8 @@ int main(){
 
                 numbers[j] = result;
 
-                numbers = fix(numbers, j+1, insert);
-                op = fix(op, j, insert);
+                numbers = fix(numbers, j+1);
+                op = fix(op, j);
 
                 j--;
 
