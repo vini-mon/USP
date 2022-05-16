@@ -1,61 +1,129 @@
 "use strict"
 
-const text = document.getElementById('change_heading');
+window.addEventListener('DOMContentLoaded', (event) => {
+    
+    const text = document.getElementById('change_heading');
 
-const block = document.querySelectorAll('div');
+    text.textContent = "Chenge color";
 
-const colorName = document.querySelector('selected');
+    const block = document.querySelectorAll('div');
 
-console.log(block);
+    const colorName = document.querySelector('span');
 
-changeColor();
-changeColorName();
+    const randomBlock = block[block.length-1];
 
-for( let i = 0 ; i < block.length ; i++ ){
+    console.log(block);
 
-    console.log(block[i]);
+    changeColor();
+    changeColorName();
 
-    block[i].addEventListener('click', function(){changeColor(block[i].className)});
-    block[i].addEventListener('mouseenter', function(){changeColorName(block[i].className)});
-    block[i].addEventListener('mouseleave', function(){changeColorName(block[i].className)});
+    for( let i = 0 ; i < block.length ; i++ ){
 
-}
+        console.log(block[i]);
 
+        block[i].addEventListener('click', () => {changeColor(block[i].className)});
+        block[i].addEventListener('mouseenter', function(){changeColorName(block[i].className)});
+        block[i].addEventListener('mouseleave', function(){changeColorName("none")});
 
-function changeColor(color){
+    }
 
-    if( text.className == color ){
+    setInterval(function(){randomColor()}, 500);
 
-        text.className = "";
+    function changeColor(color){
 
-    }else{
+        if( text.className == color ){
 
-        if( color == "brown" ){
+            text.className = "";
 
-            text.className = "brown";
+        }else{
 
-        }else if( color == "green" ){
+            if( color == "brown" ){
 
-            text.className = "green";
+                text.className = "brown";
 
-        }else if( color == "blue" ){
+            }else if( color == "green" ){
 
-            text.className = "blue";
+                text.className = "green";
 
-        }else if( color == "yellow" ){
+            }else if( color == "blue" ){
 
-            text.className = "yellow";
+                text.className = "blue";
+
+            }else if( color == "yellow" ){
+
+                text.className = "yellow";
+
+            }else if( color == "purple" ){
+
+                text.className = "purple";
+
+            }
+
+        }
+
+    }
+
+    function changeColorName(color){
+
+        if( color == "none" ){
+
+            colorName.textContent = "None!";
+
+        }else{
+
+            if( color == "brown" ){
+
+                colorName.textContent = "brown";
+        
+            }else if( color == "green" ){
+
+                colorName.textContent = "green";
+        
+            }else if( color == "blue" ){
+
+                colorName.textContent = "blue";
+        
+            }else if( color == "yellow" ){
+
+                colorName.textContent = "yellow";
+        
+            }else if( color == "purple" ){
+
+                colorName.textContent = "purple";
+        
+            }
+
+        }
+
+    }
+
+    function randomColor(){
+
+        let newColor = Math.floor(Math.random() * 5);
+
+        if( newColor == 0 ){
+
+            randomBlock.className = "brown";
+
+        }else if( newColor == 1 ){
+
+            randomBlock.className = "green";
+
+        }else if( newColor == 2 ){
+
+            randomBlock.className = "blue";
+
+        }else if( newColor == 3 ){
+
+            randomBlock.className = "yellow";
+
+        }else if( newColor == 4 ){
+
+            randomBlock.className = "purple";
 
         }
 
     }
 
     
-
-}
-
-function changeColorName(color){
-
-    console.log(color);
-
-}
+});

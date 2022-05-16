@@ -1,15 +1,15 @@
 "use strict";
 
-var madTalk = document.getElementById('lib-button');
-var story = document.getElementById('story');
+let madTalk = document.getElementById('lib-button');
+let story = document.getElementById('story');
 
-var noun = document.getElementById('noun');
-var adjective = document.getElementById('adjective');
-var person = document.getElementById('person');
+let noun = document.getElementById('noun');
+let adjective = document.getElementById('adjective');
+let person = document.getElementById('person');
 
 function makeMadTalk(){
 
-    var text = person.value + " " + adjective.value + " " + noun.value;
+    let text = person.value + " like " + adjective.value + " " + noun.value;
 
     story.innerText = text;
 
