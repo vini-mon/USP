@@ -1,0 +1,15 @@
+.article{
+
+    margin-left: 50px;
+
+}
+
+.square{
+
+    border: 1px solid black;
+    width: 500px;
+    height: 500px;
+
+    margin-bottom: 20px;
+
+}
