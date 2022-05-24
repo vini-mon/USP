@@ -3,7 +3,7 @@
 #define PINO_TX 13
 #define RTS 11
 #define CTS 10
-#define BAUD_RATE 1
+#define BAUD_RATE 30
 #define HALF_BAUD 1000/(2*BAUD_RATE)
 
 #include "Temporizador.h"
@@ -12,6 +12,8 @@ int actualBit = 0;
 int val;
 char actualChar;
 bool temp = false;
+
+bool bitParidadeRecebido = false;
 
 // Calcula bit de paridade - Par ou impar
 bool bitParidade(char dado){
@@ -29,24 +31,22 @@ ISR(TIMER1_COMPA_vect){
 
   // começo a ler a partir dos dados
   //bits de dados
+
+  val = digitalRead(PINO_TX);
+     
   if(actualBit >= 0 && actualBit < 8){
-    val = digitalRead(PINO_TX);
     bitWrite(actualChar, actualBit, val);
   }
 
   //bit de paridade
   else if(actualBit == 8) {
-    val = digitalRead(PINO_TX);
-  }   
-  
-  else if(actualBit > 9){
-    
-    digitalWrite(CTS, LOW);
-    paraTemporizador();
+    bitParidadeRecebido = val == 0 ? true : false;
   }
   
-  if(actualBit <= 9)
+  if(actualBit <= 9){
     actualBit++;
+    //Serial.print(val);
+  }
 }
 
 
@@ -76,15 +76,13 @@ void loop ( ) {
   // VERIFICAR SE O RTS É HIGH E O CTS TÁ LOW, SE SIM, SETO O CTS PRA HIGH
   if(digitalRead(RTS) == HIGH && digitalRead(CTS) == LOW) {
     digitalWrite(CTS, HIGH);
-    actualBit = 0;   // resetando
-  }
-   
-
-  if(digitalRead(RTS) == HIGH && digitalRead(CTS) == HIGH && !temp && digitalRead(PINO_TX) == HIGH) { // o start bit foi utilizado para iniciar o temporizador
+    actualBit = -1;   // resetando
+    delay(HALF_BAUD);  // delay para controlar a sincronizacao de escrita/leitura
+                // deixar delay na metade do período do clock
     temp = true;
     iniciaTemporizador();
   }
-
+   
   // VERIFICA SE RTS É LOW E ESTAMOS NO MEIO DE UMA TRANSMISSAO
   // SE SIM, EU SETO MEU CTS PRA LOW, PARO O TEMPORIZADOR
   if(digitalRead(RTS) == LOW && digitalRead(CTS) == HIGH && temp) {
@@ -93,7 +91,7 @@ void loop ( ) {
     paraTemporizador();
 
     // se o bit de paridade for par, printo o ultimo char
-    if(bitParidade(actualChar)) {
+    if(bitParidade(actualChar) == bitParidadeRecebido ) {
       Serial.print(actualChar);
     }
   }
