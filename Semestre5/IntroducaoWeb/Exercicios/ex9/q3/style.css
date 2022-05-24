@@ -1,0 +1,27 @@
+.article{
+
+    margin-left: 50px;
+
+}
+
+.square{
+
+    border: 1px solid black;
+    width: 500px;
+    height: 500px;
+
+    margin-bottom: 20px;
+
+}
+
+.button{
+
+    margin-left: 10px;
+
+}
+
+.number{
+
+    margin-left: 100px;
+
+}

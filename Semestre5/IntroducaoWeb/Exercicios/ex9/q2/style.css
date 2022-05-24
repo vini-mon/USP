@@ -1,0 +1,35 @@
+.red{
+
+    color: red;
+
+}
+
+body{
+
+    font-size: 40px;
+    background-color: rgb(226, 226, 226);
+
+}
+
+button{
+
+    background-color: orange;
+    border-radius: 5px;
+    size: 20px;
+    font-size: 40px;
+    cursor: pointer;
+
+}
+
+input{
+
+    margin: 10px;
+    font-size: 40px;
+
+}
+
+#response{
+
+    margin-left: 50px;
+
+}
