@@ -1,3 +1,8 @@
+Alunos:
+
+Vinícius Santos Monteiro - 11932463
+Victor Gomes de Carvalho - 11275168
+
 Para compilar o programa:
 
     Primeiro deve-se compilar e rodar o "server"
