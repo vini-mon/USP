@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #define LENGTH 10000
-#define MAX 5
+#define MAX 4097
 #define PORT 8080
 #define SA struct sockaddr
 
@@ -22,60 +22,70 @@ void func(int sockfd){
         
         bzero(sendMessage, sizeof(sendMessage));
 
-        printf("\nEnter the string : ");
-
-        //n = 0;
-        //while ((buff[n++] = getchar()) != '\n');
+        printf("\nEscreva uma mensagem: ");
 
         scanf("\n%[^\n]", buff);
 
-        buff[strlen(buff)] = '\n';
-
         int ctrl = 0;
 
-        for( int i = 0 ; i < LENGTH ; i++ ){
+        for( int i = 0 ; i < strlen(buff); i++ ){
 
-            if( buff[i] == '\n' ){
+            sendMessage[ctrl] = buff[i];
 
-                sendMessage[ctrl] = '\n';
+            if( ctrl == MAX-1 ){
+
+                sendMessage[MAX-1] = '*';
 
                 write(sockfd, sendMessage, sizeof(sendMessage));
+
+                bzero(sendMessage, sizeof(sendMessage));
+
+                ctrl = -1;
+
+                i--;
+
+            }else if( i == strlen(buff)-1 ){
+
+                sendMessage[MAX-1] = '\0';
+
+                write(sockfd, sendMessage, sizeof(sendMessage));
+
                 bzero(sendMessage, sizeof(sendMessage));
 
                 break;
 
             }
 
-            if( i == MAX-1 || buff[i] == '\0' ){
+            ctrl++;
 
-                sendMessage[ctrl] = '\0';
+        }
 
-                write(sockfd, sendMessage, sizeof(sendMessage));
+        printf("\nEsperando por uma resposta...\n");
 
-                bzero(sendMessage, sizeof(sendMessage));
+        do{
 
-                ctrl = 0;
-                i--;
+            bzero(receiveMessage, sizeof(receiveMessage));
+   
+            // read the message from client and copy it in buffer
+            read(sockfd, receiveMessage, sizeof(receiveMessage));
 
-            }else{
+            printf("\n\tMensagem recebida: ");
 
-                sendMessage[ctrl] = buff[i];
-                ctrl++;
+            for( int i = 0 ; i < MAX-1 ; i++ ){
+
+                printf("%c", receiveMessage[i]);
 
             }
 
-        }
+            printf("\n");
 
-        read(sockfd, receiveMessage, sizeof(receiveMessage));
+            if( receiveMessage[MAX-1] == '\0' ){
 
-        printf("From Server : %s", receiveMessage);
+                break;
 
-        if( (strncmp(receiveMessage, "exit", 4)) == 0 ){
+            }
 
-            printf("Client Exit...\n");
-            break;
-
-        }
+        }while( 1 == 1 );
 
     }
     

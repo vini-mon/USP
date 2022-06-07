@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #define LENGTH 10000
-#define MAX 5
+#define MAX 4097
 #define PORT 8080
 #define SA struct sockaddr
    
@@ -16,98 +16,82 @@
 void func(int connfd)
 {
     int n;
+    int exit;
     char buff[LENGTH];
     char sendMessage[MAX];
     char receiveMessage[MAX];
     // infinite loop for chat
     for (;;) {
 
-        bzero(receiveMessage, sizeof(receiveMessage));
+        do{
+
+            bzero(receiveMessage, sizeof(receiveMessage));
    
-        // read the message from client and copy it in buffer
-        read(connfd, receiveMessage, sizeof(receiveMessage));
+            // read the message from client and copy it in buffer
+            read(connfd, receiveMessage, sizeof(receiveMessage));
 
-        for( int i = 0; i < MAX+1; i++ ){
+            printf("\n\tMensagem recebida: ");
 
-            if( receiveMessage[i] == '\n' ){
+            for( int i = 0 ; i < MAX-1 ; i++ ){
 
-                printf("fFrom client: %s", receiveMessage);
+                printf("%c", receiveMessage[i]);
 
-                bzero(receiveMessage, sizeof(receiveMessage));
+            }
 
-                printf("fim\n");
+            printf("\n");
+
+            if( receiveMessage[MAX-1] == '\0' ){
 
                 break;
 
             }
 
-            if( receiveMessage[i] == '\0' ){
+        }while( 1 == 1 );
 
-                printf("fFrom client: %s", receiveMessage);
-                bzero(receiveMessage, sizeof(receiveMessage));
+        printf("\n");
 
-                printf("fechou\n");
+        bzero(sendMessage, sizeof(sendMessage));
 
-                read(connfd, receiveMessage, sizeof(receiveMessage));
+        printf("\nEscreva uma mensagem: ");
 
-                i = 0;
-
-            }
-
-        }
-
-        n = 0;
-        // copy server message in the buffer
-        //while ((buff[n++] = getchar()) != '\n');
-
-        printf("White a messsage: ");
         scanf("\n%[^\n]", buff);
-
-        buff[strlen(buff)] = '\n';
 
         int ctrl = 0;
 
-        for( int i = 0 ; i < LENGTH ; i++ ){
+        for( int i = 0 ; i < strlen(buff); i++ ){
 
-            if( buff[i] == '\n' ){
+            sendMessage[ctrl] = buff[i];
 
-                sendMessage[ctrl] = '\n';
+            if( ctrl == MAX-1 ){
+
+                sendMessage[MAX-1] = '*';
 
                 write(connfd, sendMessage, sizeof(sendMessage));
+
+                bzero(sendMessage, sizeof(sendMessage));
+
+                ctrl = -1;
+
+                i--;
+
+            }else if( i == strlen(buff)-1 ){
+
+                sendMessage[MAX-1] = '\0';
+
+                write(connfd, sendMessage, sizeof(sendMessage));
+
                 bzero(sendMessage, sizeof(sendMessage));
 
                 break;
 
             }
 
-            if( i == MAX-1 || buff[i] == '\0' ){
-
-                sendMessage[ctrl] = '\0';
-
-                write(connfd, sendMessage, sizeof(sendMessage));
-
-                bzero(sendMessage, sizeof(sendMessage));
-
-                ctrl = 0;
-                i--;
-
-            }else{
-
-                sendMessage[ctrl] = buff[i];
-                ctrl++;
-
-            }
+            ctrl++;
 
         }
-   
-        // and send that buffer to client
-        //write(connfd, sendMessage, sizeof(sendMessage));
-   
-        // if msg contains "Exit" then server exit and chat ended.
-        if (strncmp("exit", buff, 4) == 0) {
-            printf("Server Exit...\n");
-            break;
-        }
+
+        printf("\nEsperando por uma resposta...\n");
+
     }
 }
    
