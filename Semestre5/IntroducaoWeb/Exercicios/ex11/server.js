@@ -16,14 +16,11 @@ http.createServer( (request, response) => {
 
     if (filePath == './') {
 
-        console.log("brabo");
         filePath = './index.html';
 
     }else if(filePath == './random'){
 
-        let url = new URLSearchParams(document.location.search.substring(1));
-
-        console.log(url);
+        console.log(request.url);
 
         filePath = './random/random.js';
 
