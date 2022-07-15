@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #define LENGTH 10000
 #define MAX 4097
-#define PORT 8080
+#define PORT 8081
 #define SA struct sockaddr
    
 // Função destinada ao chat entre cliente e servidor
@@ -103,12 +103,15 @@ int main()
    
     // socket create and verification
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
     if (sockfd == -1) {
+
         printf("socket creation failed...\n");
         exit(0);
-    }
-    else
+
+    }else
         printf("Socket successfully created..\n");
+
     bzero(&servaddr, sizeof(servaddr));
    
     // assign IP, PORT
@@ -118,33 +121,68 @@ int main()
    
     // Binding newly created socket to given IP and verification
     if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
+
         printf("socket bind failed...\n");
         exit(0);
-    }
-    else
+
+    }else
         printf("Socket successfully binded..\n");
    
     // Now server is ready to listen and verification
     if ((listen(sockfd, 5)) != 0) {
+
         printf("Listen failed...\n");
         exit(0);
-    }
-    else
+
+    }else
         printf("Server listening..\n");
+
     len = sizeof(cli);
    
     // Accept the data packet from client and verification
-    connfd = accept(sockfd, (SA*)&cli, &len);
-    if (connfd < 0) {
-        printf("server accept failed...\n");
-        exit(0);
+    //connfd = accept(sockfd, (SA*)&cli, &len);
+
+    char message[100] = "";
+    
+    while( connfd = accept(sockfd, (SA*)NULL, NULL) ){
+
+        printf("address: %d", connfd);
+
+        printf("server accepted you!\n");
+
+        strcpy(message, "<server>:**alguem se conectou**\n");
+        write(connfd, message, sizeof(message));
+
+        int pid;
+
+        if((pid = fork()) == 0) {
+
+            while (recv(connfd, message, 100, 0) > 0) {
+
+                if( strcmp(message, "") != 0 ){
+
+                    printf("Message Received: %s\n", message);
+                    
+                    strcpy(message, "<server>:Recebemos a sua mensagem, é nois\n");
+                    write(connfd, message, sizeof(message));
+
+                }
+
+                stpcpy(message, "");
+
+            }
+
+            exit(0);
+
+        }else{
+
+            strcpy(message, "<server>:Você está conectado");
+            write(connfd, message, sizeof(message));
+
+        }
+
     }
-    else
-        printf("server accept the client...\n");
-   
-    // Function for chatting between client and server
-    func(connfd);
-   
+
     // After chatting close the socket
     close(sockfd);
 }
