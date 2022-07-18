@@ -15,6 +15,53 @@
 
 using namespace std;
 
+char* nickname = new char[50];
+
+/*
+
+    map IRC commands
+
+    connect: /connect 
+    nickname: /nick <nickname>
+    msg: <message>
+    quit: /quit
+
+
+*/
+
+bool find(string command, char* find){
+
+    cout << command << "|" << find << endl;
+
+    if( strlen(find) > command.length() ) return false;
+
+    for( int i = 0 ; i < strlen(find) ; i++ ){
+
+        if( command[i] != find[i] ) return false;
+
+    }
+
+    return true;
+
+}
+
+char* extract( string command, int position ){
+
+    int start = 0;
+    char* extract = new char[50];
+
+    for( int i = position ; i < command.length() ; i++ ){
+
+        extract[start++] = command[i];
+
+    }
+
+    extract[command.length()] = '\0';
+
+    return extract;
+
+}
+
 void func(int sockfd){
 
     int n;
@@ -29,11 +76,28 @@ void func(int sockfd){
         
             bzero(sendMessage, sizeof(sendMessage));
 
-            printf("\n$<%d>: ", sockfd);
+            printf("\n$<%s>: ", nickname);
 
             scanf("\n%[^\n]", buff);
 
             if( strcmp(buff, "/quit") == 0 ){
+
+                //strcpy(sendMessage, buff);
+
+                //write(sockfd, sendMessage, sizeof(sendMessage));
+
+                //bzero(sendMessage, sizeof(sendMessage));
+
+                printf("Finalizando conexão");
+                close(sockfd);
+                exit(0);
+                // break;
+
+            }else if( find(buff, (char*)"/nickname ") ){
+
+                char* validNickname = new char[50];
+                
+                validNickname = extract(buff, 10);
 
                 strcpy(sendMessage, buff);
 
@@ -41,44 +105,41 @@ void func(int sockfd){
 
                 bzero(sendMessage, sizeof(sendMessage));
 
-                printf("Finalizando conexão");
-                close(sockfd);
-                exit(0);
-                // break;
+            }else{
 
-            }
+                int ctrl = 0;
 
-            int ctrl = 0;
+                for( int i = 0 ; i < strlen(buff); i++ ){
 
-            for( int i = 0 ; i < strlen(buff); i++ ){
+                    sendMessage[ctrl] = buff[i];
 
-                sendMessage[ctrl] = buff[i];
+                    if( ctrl == MAX-1 ){
 
-                if( ctrl == MAX-1 ){
+                        sendMessage[MAX-1] = '*';
 
-                    sendMessage[MAX-1] = '*';
+                        write(sockfd, sendMessage, sizeof(sendMessage));
 
-                    write(sockfd, sendMessage, sizeof(sendMessage));
+                        bzero(sendMessage, sizeof(sendMessage));
 
-                    bzero(sendMessage, sizeof(sendMessage));
+                        ctrl = -1;
 
-                    ctrl = -1;
+                        i--;
 
-                    i--;
+                    }else if( i == strlen(buff)-1 ){
 
-                }else if( i == strlen(buff)-1 ){
+                        sendMessage[MAX-1] = '\0';
 
-                    sendMessage[MAX-1] = '\0';
+                        write(sockfd, sendMessage, sizeof(sendMessage));
 
-                    write(sockfd, sendMessage, sizeof(sendMessage));
+                        bzero(sendMessage, sizeof(sendMessage));
 
-                    bzero(sendMessage, sizeof(sendMessage));
+                        break;
 
-                    break;
+                    }
+
+                    ctrl++;
 
                 }
-
-                ctrl++;
 
             }
 
@@ -114,7 +175,7 @@ void func(int sockfd){
     }
     
 }
-   
+
 int main(){
     
     int sockfd, connfd;
@@ -134,12 +195,21 @@ int main(){
         
     }
 
+    string command = "";
+
+    char input[LENGTH];
+
+    nickname[0] = '$';
+
     while (1) {
 
-        string command = "";
+        printf("%s: ", nickname);
+        
+        scanf("\n%[^\n]", input);
 
-        printf("$: ");
-        cin >> command;
+        cout << "input: " << input << endl;
+
+        command = input;
 
         if (command == "/connect"){
 
@@ -151,7 +221,7 @@ int main(){
             servaddr.sin_port = htons(PORT);
         
             // connect the client socket to server socket
-            if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) {
+            if ( connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0 ) {
 
                 printf("connection with the server failed...\n");
                 exit(0);
@@ -161,6 +231,8 @@ int main(){
                 printf("connected to the server..\n");
 
             }
+
+           // write(sockfd, sendMessage, sizeof(sendMessage));
         
             // function for chat
             func(sockfd);
