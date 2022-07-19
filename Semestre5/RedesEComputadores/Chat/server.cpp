@@ -122,17 +122,10 @@ int main(){
 
     teste = (char*) "jamal";
     connAddress.push_back( make_pair(98, teste) );
-
     
     while( connfd = accept(sockfd, (SA*)NULL, NULL) ){
 
         connAddress.push_back( make_pair(connfd, to_string(connfd) ) );
-
-        for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
-
-            cout << itr->first << "|" << itr->second << endl;
-
-        }
 
         printf("server accepted a new connection <%d>\n", connfd);
 
@@ -197,7 +190,7 @@ int main(){
                             sleep(1);
 
                             messageTool.clear();
-                            messageTool.append("/nickname ").append(validNickname).append("\n");
+                            messageTool.append("/nickname ").append(connAddress[ indexClient(connfd) ].second);
                             stpcpy(message, messageTool.c_str());
 
                             write(connfd, message, sizeof(message));
@@ -218,7 +211,7 @@ int main(){
                         printf("Message Received from <%d|%s>: %s\n", connfd, connAddress[indexClient(connfd)].second.c_str() , message); 
 
                         messageTool.clear();
-                        messageTool.append("<").append(to_string(connfd)).append(">:");
+                        messageTool.append("<").append(connAddress[indexClient(connfd)].second).append(">:");
 
                         messageTool += message;
                         messageTool += "\n";
@@ -227,8 +220,12 @@ int main(){
 
                         for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
+                            cout << "enviando para " << itr->first << "|" << itr->second << endl;
+
                             if( (int) itr->first != connfd )
                                 write(itr->first, message, sizeof(message));
+
+                                continue;
 
                         }
                     }
@@ -243,7 +240,7 @@ int main(){
 
         }else{
 
-            strcpy(message, "<server>:Você está conectado");
+            strcpy(message, "<server>:Você está conectado\n");
             write(connfd, message, sizeof(message));
 
         }

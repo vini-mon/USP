@@ -22,9 +22,10 @@ string nickname;
     map IRC commands
 
     connect: /connect 
-    nickname: /nick <nickname>
+    nickname: /nickname <nickname>
     msg: <message>
     quit: /quit
+    ack: /ack
 
 
 */
@@ -69,8 +70,6 @@ void func(int sockfd){
 
     // infinite loop for chat
     for (;;) {
-
-        cout << nickname << endl;
 
         if( fork() == 0 ){
         
@@ -154,6 +153,8 @@ void func(int sockfd){
                 // read the message from client and copy it in buffer
                 read(sockfd, receiveMessage, sizeof(receiveMessage));
 
+                cout << receiveMessage << endl; 
+
                 if( find(receiveMessage, (char*)"/nickname ") ){
 
                     cout << receiveMessage << endl;
@@ -182,6 +183,20 @@ void func(int sockfd){
     
 }
 
+void *receiveThread( void *vargp ){
+
+    return NULL;
+
+}
+
+void *sendThread( void *vargp ){
+
+    cout << "deu certo mano?" << endl;
+
+    return NULL;
+
+}
+
 int main(){
     
     int sockfd, connfd;
@@ -205,7 +220,17 @@ int main(){
 
     char input[LENGTH];
 
-    nickname = "@";
+    nickname = "$";
+/*
+    pthread_t thread_id1;
+    pthread_t thread_id2;
+
+    pthread_create(&thread_id1, NULL, receiveThread, NULL);
+    pthread_create(&thread_id2, NULL, sendThread, NULL);
+
+    pthread_join(thread_id1, NULL);
+    pthread_join(thread_id2, NULL);
+*/
 
     while (1) {
 
@@ -239,6 +264,7 @@ int main(){
            // write(sockfd, sendMessage, sizeof(sendMessage));
         
             // function for chat
+            
             func(sockfd);
 
             break;
