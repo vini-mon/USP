@@ -20,11 +20,9 @@
 using namespace std;
 
 // .first is the connection, .second is the nickname
-vector< pair<int, char*> > connAddress;
+vector< pair<int, string> > connAddress;
 
 bool find(string command, char* find){
-
-    cout << command << "|" << find << endl;
 
     if( strlen(find) > command.length() ) return false;
 
@@ -128,7 +126,13 @@ int main(){
     
     while( connfd = accept(sockfd, (SA*)NULL, NULL) ){
 
-        connAddress.push_back( make_pair(connfd, new char[50]) );
+        connAddress.push_back( make_pair(connfd, to_string(connfd) ) );
+
+        for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+            cout << itr->first << "|" << itr->second << endl;
+
+        }
 
         printf("server accepted a new connection <%d>\n", connfd);
 
@@ -158,15 +162,13 @@ int main(){
                     }else if( find(message, (char*)"/nickname ") ){
 
                         bool valid = true;
-                        char* validNickname = new char[50];
+                        string validNickname = new char[50];
                         
-                        validNickname = extract(message, 10);
+                        validNickname = (string) extract(message, 10);
 
                         for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
-                            cout << "|" << itr->second << "|" << "|" << validNickname << "|" << endl;
-
-                            if( strcmp(itr->second, validNickname) == 0 ){
+                            if( itr->second == validNickname ){
 
                                 valid = false;
                                 break;
@@ -180,7 +182,7 @@ int main(){
                             connAddress[ indexClient(connfd) ].second = validNickname;
 
                             messageTool.clear();
-                            messageTool.append("<server>: <").append(to_string(connfd)).append("> mudou seu nome para: ").append(validNickname);
+                            messageTool.append("<server>: <").append(to_string(connfd)).append("> mudou seu nome para: ").append(validNickname).append("\n");
 
                             cout << messageTool << endl;
 
@@ -191,6 +193,14 @@ int main(){
                                 write(itr->first, message, sizeof(message));
 
                             }
+
+                            sleep(1);
+
+                            messageTool.clear();
+                            messageTool.append("/nickname ").append(validNickname).append("\n");
+                            stpcpy(message, messageTool.c_str());
+
+                            write(connfd, message, sizeof(message));
 
                         }else{
 
@@ -205,7 +215,7 @@ int main(){
 
                     }else{
 
-                        printf("Message Received from <%d>: %s\n", connfd, message); 
+                        printf("Message Received from <%d|%s>: %s\n", connfd, connAddress[indexClient(connfd)].second.c_str() , message); 
 
                         messageTool.clear();
                         messageTool.append("<").append(to_string(connfd)).append(">:");

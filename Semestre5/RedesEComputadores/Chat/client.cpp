@@ -15,7 +15,7 @@
 
 using namespace std;
 
-char* nickname = new char[50];
+string nickname;
 
 /*
 
@@ -30,8 +30,6 @@ char* nickname = new char[50];
 */
 
 bool find(string command, char* find){
-
-    cout << command << "|" << find << endl;
 
     if( strlen(find) > command.length() ) return false;
 
@@ -55,7 +53,7 @@ char* extract( string command, int position ){
         extract[start++] = command[i];
 
     }
-
+    
     extract[command.length()] = '\0';
 
     return extract;
@@ -72,11 +70,13 @@ void func(int sockfd){
     // infinite loop for chat
     for (;;) {
 
+        cout << nickname << endl;
+
         if( fork() == 0 ){
         
             bzero(sendMessage, sizeof(sendMessage));
 
-            printf("\n$<%s>: ", nickname);
+            cout << "<" << nickname << ">: ";
 
             scanf("\n%[^\n]", buff);
 
@@ -154,17 +154,23 @@ void func(int sockfd){
                 // read the message from client and copy it in buffer
                 read(sockfd, receiveMessage, sizeof(receiveMessage));
 
-                for( int i = 0 ; i < MAX-1 ; i++ ){
+                if( find(receiveMessage, (char*)"/nickname ") ){
 
-                    printf("%c", receiveMessage[i]);
+                    cout << receiveMessage << endl;
+                
+                    nickname = (string) extract(receiveMessage, 10);
 
-                }
+                    cout << "Nickname alterado para: " << nickname << endl;
 
-                printf("\n");
+                }else{
 
-                if( receiveMessage[MAX-1] == '\0' ){
+                    printf("%s", receiveMessage);
 
-                    break;
+                    if( receiveMessage[MAX-1] == '\0' ){
+
+                        break;
+
+                    }
 
                 }
 
@@ -199,19 +205,17 @@ int main(){
 
     char input[LENGTH];
 
-    nickname[0] = '$';
+    nickname = "@";
 
     while (1) {
 
-        printf("%s: ", nickname);
+        printf("<$>: ");
         
         scanf("\n%[^\n]", input);
 
-        cout << "input: " << input << endl;
-
         command = input;
 
-        if (command == "/connect"){
+        if (command != "/connect"){
 
             bzero(&servaddr, sizeof(servaddr));
    
