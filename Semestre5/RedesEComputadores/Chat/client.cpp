@@ -3,11 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #define LENGTH 10000
 #define MAX 4097
-#define PORT 8080
+#define PORT 8081
 #define SA struct sockaddr
 
 #include<iostream>
@@ -15,6 +16,7 @@
 
 using namespace std;
 
+int sockfd;
 string nickname;
 
 /*
@@ -183,23 +185,146 @@ void func(int sockfd){
     
 }
 
+bool runnig = true;
+
 void *receiveThread( void *vargp ){
 
-    return NULL;
+    cout << "Entrando no thread de recebimento de mensagens" << endl;
+
+    char receiveMessage[MAX];
+
+    while(runnig){
+
+        do{
+
+            //printf("\nEsperando por uma resposta...\n");
+
+            bzero(receiveMessage, sizeof(receiveMessage));
+
+            // read the message from client and copy it in buffer
+
+            read(sockfd, receiveMessage, sizeof(receiveMessage));
+
+                if( find(receiveMessage, (char*)"/nickname ") ){
+
+                    cout << receiveMessage << endl;
+                
+                    nickname = (string) extract(receiveMessage, 10);
+
+                    cout << "Nickname alterado para: " << nickname << endl;
+
+                }else{
+
+                    cout << receiveMessage;
+
+                    if( receiveMessage[MAX-1] == '\0' ){
+
+                        break;
+
+                    }
+
+                }
+
+        }while( 1 == 1 );
+
+    }
+
+    return nullptr;
 
 }
 
 void *sendThread( void *vargp ){
 
-    cout << "deu certo mano?" << endl;
+    cout << "Entrando no thread de enviamento de mensagens" << endl;
 
-    return NULL;
+    string input;
+    char buff[LENGTH];
+    char sendMessage[MAX];
+
+    // infinite loop for chat
+    while(runnig) {
+        
+        bzero(sendMessage, sizeof(sendMessage));
+
+        cout << "<" << nickname << ">: ";
+
+        //scanf("\n%[^\n]", buff);
+
+        getline(cin, input);
+
+        strcpy(buff, input.c_str());
+
+        if( strcmp(buff, "/quit") == 0 ){
+
+            //strcpy(sendMessage, buff);
+
+            //write(sockfd, sendMessage, sizeof(sendMessage));
+
+            //bzero(sendMessage, sizeof(sendMessage));
+
+            printf("Finalizando conexão");
+            close(sockfd);
+            exit(0);
+            // break;
+
+        }else if( find(buff, (char*)"/nickname ") ){
+
+            char* validNickname = new char[50];
+            
+            validNickname = extract(buff, 10);
+
+            strcpy(sendMessage, buff);
+
+            write(sockfd, sendMessage, sizeof(sendMessage));
+
+            bzero(sendMessage, sizeof(sendMessage));
+
+        }else{
+
+            int ctrl = 0;
+
+            for( int i = 0 ; i < strlen(buff); i++ ){
+
+                sendMessage[ctrl] = buff[i];
+
+                if( ctrl == MAX-1 ){
+
+                    sendMessage[MAX-1] = '*';
+
+                    write(sockfd, sendMessage, sizeof(sendMessage));
+
+                    bzero(sendMessage, sizeof(sendMessage));
+
+                    ctrl = -1;
+
+                    i--;
+
+                }else if( i == strlen(buff)-1 ){
+
+                    sendMessage[MAX-1] = '\0';
+
+                    write(sockfd, sendMessage, sizeof(sendMessage));
+
+                    bzero(sendMessage, sizeof(sendMessage));
+
+                    break;
+
+                }
+
+                ctrl++;
+
+            }
+
+        }
+
+    }
+
+    return nullptr;
 
 }
 
 int main(){
     
-    int sockfd, connfd;
     struct sockaddr_in servaddr, cli;
    
     // socket create and verification
@@ -218,27 +343,21 @@ int main(){
 
     string command = "";
 
-    char input[LENGTH];
+    //char input[LENGTH];
 
     nickname = "$";
-/*
-    pthread_t thread_id1;
-    pthread_t thread_id2;
 
-    pthread_create(&thread_id1, NULL, receiveThread, NULL);
-    pthread_create(&thread_id2, NULL, sendThread, NULL);
-
-    pthread_join(thread_id1, NULL);
-    pthread_join(thread_id2, NULL);
-*/
+    pthread_t thread_id_receive;
+    pthread_t thread_id_send;
+    pthread_t thread_id_teste;
 
     while (1) {
 
         printf("<$>: ");
         
-        scanf("\n%[^\n]", input);
-
-        command = input;
+        //scanf("\n%[^\n]", input);
+        
+        getline(cin, command);
 
         if (command != "/connect"){
 
@@ -264,8 +383,18 @@ int main(){
            // write(sockfd, sendMessage, sizeof(sendMessage));
         
             // function for chat
-            
-            func(sockfd);
+
+            //https://www.youtube.com/watch?v=C5NhMVqq90k
+
+            //https://stackoverflow.com/questions/1978617/parallel-threads-in-c
+
+            pthread_create(&thread_id_receive, NULL, receiveThread, NULL);
+            pthread_create(&thread_id_send, NULL, sendThread, NULL);
+
+            pthread_join(thread_id_receive, NULL);
+            pthread_join(thread_id_send, NULL);
+
+            //func(sockfd);
 
             break;
 

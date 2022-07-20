@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #define LENGTH 10000
 #define MAX 4097
-#define PORT 8080
+#define PORT 8081
 #define SA struct sockaddr
 
 #include<iostream>
@@ -18,6 +18,8 @@
 #include<string>
 
 using namespace std;
+
+int sockfd;
 
 // .first is the connection, .second is the nickname
 vector< pair<int, string> > connAddress;
@@ -65,10 +67,76 @@ int indexClient(int find){
 
 }
 
+bool running = true;
+
+void *serverAccept( void *vargp ){
+
+    int connfd;
+
+    char message[100] = "";
+    string messageTool = "";
+
+    while(true){
+
+        while( connfd = accept(sockfd, (SA*)NULL, NULL) ){
+
+            connAddress.push_back( make_pair(connfd, to_string(connfd) ) );
+
+            printf("server accepted a new connection <%d>\n", connfd);
+
+            messageTool.clear();
+            messageTool.append("<server>:Cliente ").append(to_string(connfd)).append(" se conectou\n");
+
+            strcpy(message, messageTool.c_str());
+
+            for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+                if( itr->first != connfd )
+                    write(itr->first, message, sizeof(message));
+
+            }
+
+            strcpy(message, "<server>:Você está conectado\n");
+            write(connfd, message, sizeof(message));
+
+        }
+
+    }
+
+    return nullptr;
+
+}
+
+void *sendThread( void *vargp ){
+
+    char message[100] = "";
+    string messageTool = "";
+
+    while(true){
+
+        sleep(2);
+
+        messageTool.clear();
+        messageTool.append("teste maluco!!!\n");
+
+        strcpy(message, messageTool.c_str());
+
+        for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+            write(itr->first, message, sizeof(message));
+
+        }
+
+    } 
+
+    return nullptr;
+
+}
+
 // Driver function
 int main(){
     
-    int sockfd, connfd, len;
+    int connfd, len;
     struct sockaddr_in servaddr, cli;
 
     char message[100] = "";
@@ -122,6 +190,17 @@ int main(){
 
     teste = (char*) "jamal";
     connAddress.push_back( make_pair(98, teste) );
+
+    pthread_t thread_id_server;
+    pthread_t thread_id_send;
+
+    pthread_create(&thread_id_server, NULL, serverAccept, NULL);
+    pthread_create(&thread_id_send, NULL, sendThread, NULL);
+    
+    pthread_join(thread_id_server, NULL);
+    pthread_join(thread_id_send, NULL);
+
+    /*
     
     while( connfd = accept(sockfd, (SA*)NULL, NULL) ){
 
@@ -133,7 +212,7 @@ int main(){
         messageTool.append("<server>:Cliente ").append(to_string(connfd)).append(" se conectou\n");
 
         strcpy(message, messageTool.c_str());
-        
+
         for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
             if( itr->first != connfd )
@@ -246,6 +325,8 @@ int main(){
         }
 
     }
+
+    */
 
     // After chatting close the socket
     close(sockfd);
