@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <semaphore.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -447,7 +448,36 @@ void *messageThread( void *vargp ){
 
 }
 
+void *quitThread( void *vargp ){
+
+    while(running){
+
+        char input = '.';
+
+        while( true ){
+
+            scanf("%c", &input);
+
+            if( input == '/' ){
+
+                running = false;
+                break;
+
+            }
+
+        }
+
+        running = false;
+
+    }
+
+    return nullptr;
+
+}
+
 int main(){
+
+    signal(SIGINT, SIG_IGN);
     
     struct sockaddr_in servaddr;
 
@@ -500,6 +530,7 @@ int main(){
 
     pthread_t thread_id_server;
     pthread_t thread_id_message;
+    pthread_t thread_id_quit;
 
     if(sem_init(&semaphore, 0, 1) != 0){
         cout << "erro ao inicializar o semaforo" << endl;
@@ -514,28 +545,34 @@ int main(){
     pthread_create(&thread_id_server, NULL, serverAccept, NULL);
     pthread_create(&thread_id_message, NULL, messageThread, NULL);
 
-    string input = "";
+    char input = '.';
 
-    while( input != "/" ){
-        getline(cin, input);
+    while( running ){
+
+        while(true){
+
+            scanf("%c", &input);
+
+            if( input == '/' )
+                break;
+
+        }
+
+        running = false;
+
     }
 
-    cout << "Finalizando threads" << endl;
-
-    exit(0);
-
-    running = false;
-
-    pthread_join(thread_id_server, nullptr);
-    pthread_join(thread_id_message, nullptr);
-
-    cout << "Threads end" << endl;
+    cout << "Server closed" << endl;
 
     pthread_mutex_destroy(&mtx);
     sem_destroy(&semaphore);
+    cout << "Semaphore and Mutex destoyed" << endl;
 
     // After chatting close the socket
     close(sockfd);
+    cout << "Socket closed" << endl;
+
+    cout << endl << "Bye bye! :)" << endl;
 
     exit(0);
 

@@ -1,5 +1,6 @@
 #include <netdb.h>
 #include <stdio.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -100,6 +101,10 @@ void *receiveThread( void *vargp ){
                 
                     runnig = false;
 
+                    write(sockfd, ack, MAX);
+
+                    break;
+
                 }else if( find(receiveMessage, (char*)"/pong") ){
 
                     cout << "<server>: PONG" << endl;
@@ -151,11 +156,10 @@ void *sendThread( void *vargp ){
 
         if( strcmp(buff, "/quit") == 0 ){
 
+            bzero(sendMessage, sizeof(sendMessage));
             strcpy(sendMessage, buff);
 
             write(sockfd, sendMessage, sizeof(sendMessage));
-
-            bzero(sendMessage, sizeof(sendMessage));
 
         }else if( find(buff, (char*)"/nickname ") ){
 
@@ -163,11 +167,10 @@ void *sendThread( void *vargp ){
             
             validNickname = extract(buff, 10);
 
+            bzero(sendMessage, sizeof(sendMessage));
             strcpy(sendMessage, buff);
 
             write(sockfd, sendMessage, sizeof(sendMessage));
-
-            bzero(sendMessage, sizeof(sendMessage));
 
         }else{
 
@@ -214,6 +217,8 @@ void *sendThread( void *vargp ){
 }
 
 int main(){
+
+    signal(SIGINT, SIG_IGN);
     
     struct sockaddr_in servaddr, cli;
    
@@ -249,7 +254,7 @@ int main(){
         
         getline(cin, command);
 
-        if (command != "/connect"){
+        if (command == "/connect"){
 
             bzero(&servaddr, sizeof(servaddr));
    
