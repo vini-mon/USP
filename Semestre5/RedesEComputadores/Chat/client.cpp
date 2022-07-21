@@ -63,128 +63,6 @@ char* extract( string command, int position ){
 
 }
 
-void func(int sockfd){
-
-    int n;
-    char buff[LENGTH];
-    char sendMessage[MAX];
-    char receiveMessage[MAX];
-
-    // infinite loop for chat
-    for (;;) {
-
-        if( fork() == 0 ){
-        
-            bzero(sendMessage, sizeof(sendMessage));
-
-            cout << "<" << nickname << ">: ";
-
-            scanf("\n%[^\n]", buff);
-
-            if( strcmp(buff, "/quit") == 0 ){
-
-                //strcpy(sendMessage, buff);
-
-                //write(sockfd, sendMessage, sizeof(sendMessage));
-
-                //bzero(sendMessage, sizeof(sendMessage));
-
-                printf("Finalizando conexão");
-                close(sockfd);
-                exit(0);
-                // break;
-
-            }else if( find(buff, (char*)"/nickname ") ){
-
-                char* validNickname = new char[50];
-                
-                validNickname = extract(buff, 10);
-
-                strcpy(sendMessage, buff);
-
-                write(sockfd, sendMessage, sizeof(sendMessage));
-
-                bzero(sendMessage, sizeof(sendMessage));
-
-            }else{
-
-                int ctrl = 0;
-
-                for( int i = 0 ; i < strlen(buff); i++ ){
-
-                    sendMessage[ctrl] = buff[i];
-
-                    if( ctrl == MAX-1 ){
-
-                        sendMessage[MAX-1] = '*';
-
-                        write(sockfd, sendMessage, sizeof(sendMessage));
-
-                        bzero(sendMessage, sizeof(sendMessage));
-
-                        ctrl = -1;
-
-                        i--;
-
-                    }else if( i == strlen(buff)-1 ){
-
-                        sendMessage[MAX-1] = '\0';
-
-                        write(sockfd, sendMessage, sizeof(sendMessage));
-
-                        bzero(sendMessage, sizeof(sendMessage));
-
-                        break;
-
-                    }
-
-                    ctrl++;
-
-                }
-
-            }
-
-        }else{
-            
-            do{
-
-                //printf("\nEsperando por uma resposta...\n");
-
-                bzero(receiveMessage, sizeof(receiveMessage));
-    
-                // read the message from client and copy it in buffer
-                read(sockfd, receiveMessage, sizeof(receiveMessage));
-
-                cout << receiveMessage << endl; 
-
-                if( find(receiveMessage, (char*)"/nickname ") ){
-
-                    cout << receiveMessage << endl;
-                
-                    nickname = (string) extract(receiveMessage, 10);
-
-                    cout << "Nickname alterado para: " << nickname << endl;
-
-                }else{
-
-                    printf("%s", receiveMessage);
-
-                    if( receiveMessage[MAX-1] == '\0' ){
-
-                        break;
-
-                    }
-
-                }
-
-            }while( 1 == 1 );
-
-        }
-
-    }
-    
-}
-
 bool runnig = true;
 
 void *receiveThread( void *vargp ){
@@ -193,6 +71,7 @@ void *receiveThread( void *vargp ){
 
     char receiveMessage[MAX];
     char ack[MAX];
+    strcpy(ack, "/ack");
 
     while(runnig){
 
@@ -212,6 +91,8 @@ void *receiveThread( void *vargp ){
 
                     cout << "Nickname alterado para: " << nickname << endl;
 
+                    write(sockfd, ack, MAX);
+
                 }else if( find(receiveMessage, (char*)"/quit") ){
 
                     cout << receiveMessage << endl;
@@ -223,15 +104,15 @@ void *receiveThread( void *vargp ){
 
                     cout << "<server>: PONG" << endl;
 
+                    write(sockfd, ack, MAX);
+
                 }else{
 
                     cout << receiveMessage;
 
                     if( receiveMessage[MAX-1] == '\0' ){
 
-                        strcpy(ack, "/ack");
-
-                        write(sockfd, ack, sizeof(ack));
+                        write(sockfd, ack, MAX);
 
                         break;
 
@@ -260,7 +141,7 @@ void *sendThread( void *vargp ){
         
         bzero(sendMessage, sizeof(sendMessage));
 
-        cout << "<" << nickname << ">: ";
+        cout << "@" << nickname << ": ";
 
         //scanf("\n%[^\n]", buff);
 
@@ -354,7 +235,7 @@ int main(){
 
     //char input[LENGTH];
 
-    nickname = "$";
+    nickname = "";
 
     pthread_t thread_id_receive;
     pthread_t thread_id_send;

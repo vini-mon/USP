@@ -153,7 +153,10 @@ void *serverAccept( void *vargp ){
 
 }
 
-void acknowledgementFull( int connfd, char* message ){
+void acknowledgementFull( char* message ){
+
+    cout << "ackkkkkkkkkkk" << endl;
+    cout << message << endl;
 
     for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
@@ -163,9 +166,9 @@ void acknowledgementFull( int connfd, char* message ){
 
             cout << itr->first << "|tentativa = " << attempts+1 << endl;
 
-            write(itr->first, message, sizeof(message));
+            write(itr->first, message, MAX);
 
-            sleep(1);
+            usleep(5000);
 
             int lenAck = 0;
             int readedAck = -1;
@@ -183,6 +186,7 @@ void acknowledgementFull( int connfd, char* message ){
 
                     cout << "Ack = " << ack << endl;
                     break;
+
                 }
                 
             }
@@ -214,9 +218,9 @@ void acknowledgementSingle( int connfd, char* message ){
 
                 cout << itr->first << "|tentativa = " << attempts+1 << endl;
 
-                write(itr->first, message, sizeof(message));
+                write(itr->first, message, MAX);
 
-                sleep(1);
+                usleep(5000);
 
                 int lenAck = 0;
                 int readedAck = -1;
@@ -234,6 +238,7 @@ void acknowledgementSingle( int connfd, char* message ){
 
                         cout << "Ack = " << ack << endl;
                         break;
+
                     }
                     
                 }
@@ -333,11 +338,11 @@ void *messageThread( void *vargp ){
 
                             stpcpy(message, messageTool.c_str());
 
-                            acknowledgementFull(connfd, message);
+                            acknowledgementFull(message);
 
                             cout << "voltamos ao loop" << endl;
 
-                            usleep(10000);
+                            //usleep(10000);
 
                             messageTool.clear();
                             messageTool.append("/nickname ").append(connAddress[ indexClient(connfd) ].second);
@@ -352,7 +357,7 @@ void *messageThread( void *vargp ){
 
                             stpcpy(message, messageTool.c_str());
 
-                            write(connfd, message, sizeof(message));
+                            acknowledgementSingle(connfd, message);
 
                         }
 
@@ -364,7 +369,8 @@ void *messageThread( void *vargp ){
 
                                 strcpy(message, "/quit");
 
-                                write(itr->first, message, sizeof(message));
+                                acknowledgementSingle(connfd, message);
+
                                 itr->first = -1;
                                 break;
 
@@ -377,25 +383,20 @@ void *messageThread( void *vargp ){
 
                         strcpy(message, messageTool.c_str());
 
-                        for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
-
-                            write(itr->first, message, sizeof(message));
-
-                        }
+                        acknowledgementFull(message);
 
                         //close(connfd);
 
-                        printf("%d has left the chat\n", connfd);
+                        cout << connfd << " has left the chat" << endl;
                         
                     }else if (strcmp(message, "/ping") == 0) {
 
-                        strcpy(message, "/pong");
-
                         cout << "Ping from " << connfd << endl;
 
-                        write(connfd, message, sizeof(message));
+                        strcpy(message, "/pong");
+                        acknowledgementSingle(connfd, message);
                         
-                    }else if( (strcmp(message, "/ack") != 0 )){
+                    }else if (strcmp(message, "/ack") != 0){
 
                         cout << connfd << endl;
                         cout << connAddress[indexClient(connfd)].second << endl;
