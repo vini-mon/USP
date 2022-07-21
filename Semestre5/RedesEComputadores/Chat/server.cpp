@@ -52,9 +52,13 @@ bool find(string command, char* find){
 
     for( int i = 0 ; i < (int) strlen(find) ; i++ ){
 
+        cout << "command[i]: " << command[i] << "find[i]: " << find[i] << endl;
+
         if( command[i] != find[i] ) return false;
 
     }
+
+    cout << "find" << endl;
 
     return true;
 
@@ -149,10 +153,113 @@ void *serverAccept( void *vargp ){
 
 }
 
+void acknowledgementFull( int connfd, char* message ){
+
+    for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+        int attempts = 0;
+
+        for( attempts = 0 ; attempts < 5 ; attempts++ ){
+
+            cout << itr->first << "|tentativa = " << attempts+1 << endl;
+
+            write(itr->first, message, sizeof(message));
+
+            sleep(1);
+
+            int lenAck = 0;
+            int readedAck = -1;
+            char ack[MAX] = "";
+
+            ioctl(itr->first, FIONREAD, &lenAck);
+
+            if (lenAck > 0) {
+
+                readedAck = (read(itr->first, ack, MAX));
+
+                    cout << "|" << ack << "|" << endl;
+
+                if( find(ack, (char*)"/ack") ){
+
+                    cout << "Ack = " << ack << endl;
+                    break;
+                }
+                
+            }
+
+        }
+
+        if( attempts == 5 ){
+            cout << "No response of " << itr->first << endl;
+            itr->first = -1;
+        }else{
+            cout << "Ack response of " << itr->first << endl;
+        }
+
+    }
+
+    return;
+
+}
+
+void acknowledgementSingle( int connfd, char* message ){
+
+    for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+        if( itr->first == connfd ){
+
+            int attempts = 0;
+
+            for( attempts = 0 ; attempts < 5 ; attempts++ ){
+
+                cout << itr->first << "|tentativa = " << attempts+1 << endl;
+
+                write(itr->first, message, sizeof(message));
+
+                sleep(1);
+
+                int lenAck = 0;
+                int readedAck = -1;
+                char ack[MAX] = "";
+
+                ioctl(itr->first, FIONREAD, &lenAck);
+
+                if (lenAck > 0) {
+
+                    readedAck = (read(itr->first, ack, MAX));
+
+                        cout << "|" << ack << "|" << endl;
+
+                    if( find(ack, (char*)"/ack") ){
+
+                        cout << "Ack = " << ack << endl;
+                        break;
+                    }
+                    
+                }
+
+            }
+
+            if( attempts == 5 ){
+                cout << "No response of " << itr->first << endl;
+                itr->first = -1;
+            }else{
+                cout << "Ack response of " << itr->first << endl;
+            }
+
+        }
+
+    }
+
+    return;
+
+}
+
 void *messageThread( void *vargp ){
 
     int connfd;
     char message[MAX+1] = "";
+    char ack[MAX] = "";
     string messageTool = "";
 
     while(running){
@@ -198,10 +305,7 @@ void *messageThread( void *vargp ){
 
                     cout << "Vamos verificar: " << message << endl;
                     
-                    if (strcmp(message, "/quit") == 0) {
-                        printf("%d has left the chat\n", connfd);
-                        
-                    }else if( find(message, (char*)"/nickname ") ){
+                    if( find(message, (char*)"/nickname ") ){
 
                         bool valid = true;
                         string validNickname = new char[50];
@@ -223,25 +327,23 @@ void *messageThread( void *vargp ){
                             connAddress[ indexClient(connfd) ].second = validNickname;
 
                             messageTool.clear();
-                            messageTool.append("<server>: <").append(to_string(connfd)).append("> mudou seu nome para: ").append(validNickname).append("\n");
+                            messageTool.append("<server>: <").append(to_string(connfd)).append("> mudou seu nome para: ").append(connAddress[ indexClient(connfd) ].second).append("\n");
 
                             cout << messageTool << endl;
 
                             stpcpy(message, messageTool.c_str());
 
-                            for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+                            acknowledgementFull(connfd, message);
 
-                                write(itr->first, message, sizeof(message));
+                            cout << "voltamos ao loop" << endl;
 
-                            }
-
-                            sleep(1);
+                            usleep(10000);
 
                             messageTool.clear();
                             messageTool.append("/nickname ").append(connAddress[ indexClient(connfd) ].second);
                             stpcpy(message, messageTool.c_str());
 
-                            write(connfd, message, sizeof(message));
+                            acknowledgementSingle(connfd, message);
 
                         }else{
 
@@ -254,7 +356,46 @@ void *messageThread( void *vargp ){
 
                         }
 
-                    }else{
+                    }else if (strcmp(message, "/quit") == 0) {
+
+                        for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+                            if( itr->first == connfd ){
+
+                                strcpy(message, "/quit");
+
+                                write(itr->first, message, sizeof(message));
+                                itr->first = -1;
+                                break;
+
+                            }
+
+                        }
+
+                        messageTool.clear();
+                        messageTool.append("<server>:Cliente ").append(to_string(connfd)).append(" saiu\n");
+
+                        strcpy(message, messageTool.c_str());
+
+                        for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+                            write(itr->first, message, sizeof(message));
+
+                        }
+
+                        //close(connfd);
+
+                        printf("%d has left the chat\n", connfd);
+                        
+                    }else if (strcmp(message, "/ping") == 0) {
+
+                        strcpy(message, "/pong");
+
+                        cout << "Ping from " << connfd << endl;
+
+                        write(connfd, message, sizeof(message));
+                        
+                    }else if( (strcmp(message, "/ack") != 0 )){
 
                         cout << connfd << endl;
                         cout << connAddress[indexClient(connfd)].second << endl;
@@ -286,6 +427,7 @@ void *messageThread( void *vargp ){
                 }
 
                 stpcpy(message, "");
+
 
             }
 

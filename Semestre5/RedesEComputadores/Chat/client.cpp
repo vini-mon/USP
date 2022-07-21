@@ -192,6 +192,7 @@ void *receiveThread( void *vargp ){
     cout << "Entrando no thread de recebimento de mensagens" << endl;
 
     char receiveMessage[MAX];
+    char ack[MAX];
 
     while(runnig){
 
@@ -206,8 +207,6 @@ void *receiveThread( void *vargp ){
             read(sockfd, receiveMessage, sizeof(receiveMessage));
 
                 if( find(receiveMessage, (char*)"/nickname ") ){
-
-                    cout << receiveMessage << endl;
                 
                     nickname = (string) extract(receiveMessage, 10);
 
@@ -220,11 +219,19 @@ void *receiveThread( void *vargp ){
                 
                     runnig = false;
 
+                }else if( find(receiveMessage, (char*)"/pong") ){
+
+                    cout << "<server>: PONG" << endl;
+
                 }else{
 
                     cout << receiveMessage;
 
                     if( receiveMessage[MAX-1] == '\0' ){
+
+                        strcpy(ack, "/ack");
+
+                        write(sockfd, ack, sizeof(ack));
 
                         break;
 
