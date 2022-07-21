@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #define LENGTH 10000
 #define MAX 4097
-#define PORT 8081
+#define PORT 8080
 #define SA struct sockaddr
 
 #include<iostream>
@@ -213,6 +213,13 @@ void *receiveThread( void *vargp ){
 
                     cout << "Nickname alterado para: " << nickname << endl;
 
+                }else if( find(receiveMessage, (char*)"/quit") ){
+
+                    cout << receiveMessage << endl;
+                    cout << "Conversa finalizada" << endl;
+                
+                    runnig = false;
+
                 }else{
 
                     cout << receiveMessage;
@@ -256,16 +263,11 @@ void *sendThread( void *vargp ){
 
         if( strcmp(buff, "/quit") == 0 ){
 
-            //strcpy(sendMessage, buff);
+            strcpy(sendMessage, buff);
 
-            //write(sockfd, sendMessage, sizeof(sendMessage));
+            write(sockfd, sendMessage, sizeof(sendMessage));
 
-            //bzero(sendMessage, sizeof(sendMessage));
-
-            printf("Finalizando conexão");
-            close(sockfd);
-            exit(0);
-            // break;
+            bzero(sendMessage, sizeof(sendMessage));
 
         }else if( find(buff, (char*)"/nickname ") ){
 
@@ -376,7 +378,7 @@ int main(){
 
             }else{
 
-                printf("connected to the server..\n");
+                printf("connected to the server. socket(%d)\n", sockfd);
 
             }
 
