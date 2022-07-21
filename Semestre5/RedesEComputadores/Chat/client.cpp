@@ -21,18 +21,16 @@ int sockfd;
 string nickname;
 
 /*
-
-    map IRC commands
+    IRC commands client
 
     connect: /connect 
     nickname: /nickname <nickname>
     msg: <message>
     quit: /quit
     ack: /ack
-
-
 */
 
+// funcao para validar o comando do cliente, retorna true se o comando for valido
 bool find(string command, char* find){
 
     if( strlen(find) > command.length() ) return false;
@@ -47,6 +45,7 @@ bool find(string command, char* find){
 
 }
 
+// funcao para extrair uma parte da mensagem do cliente, retorna a fatia extraida
 char* extract( string command, int position ){
 
     int start = 0;
@@ -66,9 +65,8 @@ char* extract( string command, int position ){
 
 bool runnig = true;
 
+// thread que recebe as mensagens do servidor
 void *receiveThread( void *vargp ){
-
-    cout << "Entrando no thread de recebimento de mensagens" << endl;
 
     char receiveMessage[MAX];
     char ack[MAX];
@@ -78,11 +76,7 @@ void *receiveThread( void *vargp ){
 
         do{
 
-            //printf("\nEsperando por uma resposta...\n");
-
             bzero(receiveMessage, sizeof(receiveMessage));
-
-            // read the message from client and copy it in buffer
 
             read(sockfd, receiveMessage, sizeof(receiveMessage));
 
@@ -90,14 +84,14 @@ void *receiveThread( void *vargp ){
                 
                     nickname = (string) extract(receiveMessage, 10);
 
-                    cout << "Nickname alterado para: " << nickname << endl;
+                    cout << endl << "Nickname alterado para: " << nickname << endl;
 
                     write(sockfd, ack, MAX);
 
                 }else if( find(receiveMessage, (char*)"/quit") ){
 
                     cout << receiveMessage << endl;
-                    cout << "Conversa finalizada" << endl;
+                    cout << endl << "Conversa finalizada" << endl;
                 
                     runnig = false;
 
@@ -107,7 +101,7 @@ void *receiveThread( void *vargp ){
 
                 }else if( find(receiveMessage, (char*)"/pong") ){
 
-                    cout << "<server>: PONG" << endl;
+                    cout << endl << "<server>: PONG" << endl;
 
                     write(sockfd, ack, MAX);
 
@@ -133,9 +127,8 @@ void *receiveThread( void *vargp ){
 
 }
 
+// thread que envia as mensagens do cliente
 void *sendThread( void *vargp ){
-
-    cout << "Entrando no thread de enviamento de mensagens" << endl;
 
     string input;
     char buff[LENGTH];
@@ -246,6 +239,8 @@ int main(){
     pthread_t thread_id_send;
     pthread_t thread_id_teste;
 
+    cout << "To start a connection to the server, send '/connect' " << endl;
+
     while (1) {
 
         printf("<$>: ");
@@ -275,13 +270,12 @@ int main(){
 
             }
 
-           // write(sockfd, sendMessage, sizeof(sendMessage));
-        
-            // function for chat
+            cout << endl << "Command List:" << endl << endl;
 
-            //https://www.youtube.com/watch?v=C5NhMVqq90k
-
-            //https://stackoverflow.com/questions/1978617/parallel-threads-in-c
+            cout << "\t/nickname <char>: set a nickname" << endl;
+            cout << "\t/ping: receive a 'pong' response from server" << endl;
+            cout << "\t/quit: close connection to the server and close the aplication" << endl << endl;
+           
 
             pthread_create(&thread_id_receive, NULL, receiveThread, NULL);
             pthread_create(&thread_id_send, NULL, sendThread, NULL);

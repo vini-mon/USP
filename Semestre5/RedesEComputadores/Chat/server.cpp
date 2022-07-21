@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <fcntl.h>          // non-blocking socket
+#include <fcntl.h>
 #include <sys/types.h>
 #define LENGTH 10000
 #define MAX 4097
@@ -21,19 +21,11 @@
 #include<vector>
 #include<string>
 
+/*
+    IRC commands client
 
-
-
-
-
-
-
-// gcc -Wall -Wextra -g
-// g++ server.cpp -o server -pthread -lrt
-
-
-
-
+    turn of server: /
+*/
 
 using namespace std;
 
@@ -47,13 +39,12 @@ vector< pair<int, string> > connAddress;
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 sem_t semaphore;
 
+// funcao para validar o comando do cliente, retorna true se o comando for valido
 bool find(string command, char* find){
 
     if( strlen(find) > command.length() ) return false;
 
     for( int i = 0 ; i < (int) strlen(find) ; i++ ){
-
-        cout << "command[i]: " << command[i] << "find[i]: " << find[i] << endl;
 
         if( command[i] != find[i] ) return false;
 
@@ -65,6 +56,7 @@ bool find(string command, char* find){
 
 }
 
+// funcao para extrair uma parte da mensagem do cliente, retorna a fatia extraida
 char* extract( string command, int position ){
 
     int start = 0;
@@ -82,6 +74,7 @@ char* extract( string command, int position ){
 
 }
 
+// funcao que verifica o index do cliente que enviou a mensagem de acordo com o socket de conexão
 int indexClient(int find){
 
     for( int i = 0 ; i < (int) connAddress.size() ; i++ ){
@@ -94,6 +87,7 @@ int indexClient(int find){
 
 }
 
+// thread de configuração de conexão com o cliente
 void *serverAccept( void *vargp ){
 
     int connfdAccepted = 0;
@@ -146,7 +140,7 @@ void *serverAccept( void *vargp ){
 
         }
 
-        usleep(100000);
+        usleep(1000);
 
     }
 
@@ -154,18 +148,14 @@ void *serverAccept( void *vargp ){
 
 }
 
+// funcao que verifica se todos os clientes receberam a mensagem enviada. Depois de 5 tentativas falhas, o servidor fecha a conexao com o cliente
 void acknowledgementFull( char* message ){
-
-    cout << "ackkkkkkkkkkk" << endl;
-    cout << message << endl;
 
     for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
         int attempts = 0;
 
         for( attempts = 0 ; attempts < 5 ; attempts++ ){
-
-            cout << itr->first << "|tentativa = " << attempts+1 << endl;
 
             write(itr->first, message, MAX);
 
@@ -181,11 +171,8 @@ void acknowledgementFull( char* message ){
 
                 readedAck = (read(itr->first, ack, MAX));
 
-                    cout << "|" << ack << "|" << endl;
-
                 if( find(ack, (char*)"/ack") ){
 
-                    cout << "Ack = " << ack << endl;
                     break;
 
                 }
@@ -196,9 +183,10 @@ void acknowledgementFull( char* message ){
 
         if( attempts == 5 ){
             cout << "No response of " << itr->first << endl;
+            cout << "Closing connection" << endl;
             itr->first = -1;
         }else{
-            cout << "Ack response of " << itr->first << endl;
+            //cout << "Ack response of " << itr->first << endl;
         }
 
     }
@@ -207,6 +195,7 @@ void acknowledgementFull( char* message ){
 
 }
 
+// funcao que verifica se um cliente especifico recebeu a mensagem enviada. Depois de 5 tentativas falhas, o servidor fecha a conexao com o cliente
 void acknowledgementSingle( int connfd, char* message ){
 
     for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
@@ -216,8 +205,6 @@ void acknowledgementSingle( int connfd, char* message ){
             int attempts = 0;
 
             for( attempts = 0 ; attempts < 5 ; attempts++ ){
-
-                cout << itr->first << "|tentativa = " << attempts+1 << endl;
 
                 write(itr->first, message, MAX);
 
@@ -233,11 +220,8 @@ void acknowledgementSingle( int connfd, char* message ){
 
                     readedAck = (read(itr->first, ack, MAX));
 
-                        cout << "|" << ack << "|" << endl;
-
                     if( find(ack, (char*)"/ack") ){
 
-                        cout << "Ack = " << ack << endl;
                         break;
 
                     }
@@ -248,9 +232,10 @@ void acknowledgementSingle( int connfd, char* message ){
 
             if( attempts == 5 ){
                 cout << "No response of " << itr->first << endl;
+                cout << "Closing connection" << endl;
                 itr->first = -1;
             }else{
-                cout << "Ack response of " << itr->first << endl;
+                //cout << "Ack response of " << itr->first << endl;
             }
 
         }
@@ -261,6 +246,7 @@ void acknowledgementSingle( int connfd, char* message ){
 
 }
 
+// thread de recebimento, envio e redirecionamento de mensagens dos clientes
 void *messageThread( void *vargp ){
 
     int connfd;
@@ -270,22 +256,12 @@ void *messageThread( void *vargp ){
 
     while(running){
 
-        cout << "\n\n\nTentando fechar aqui na MENSAGEM" << endl;
-
         sem_wait(&semaphore);
         pthread_mutex_lock(&mtx);
-
-        //cout << "fechado para receber mensageeeem" << endl;
-            //cout << "to aqui" << connfd << endl;
 
         for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
             connfd = itr->first;
-
-            /*
-                int flags = fcntl(connfd, F_GETFL, 0);
-                fcntl(connfd, F_SETFL, flags | O_NONBLOCK);
-            */
 
             int len = 0;
             int readed = -1;
@@ -298,18 +274,11 @@ void *messageThread( void *vargp ){
                 
             }
 
-            //cout << sockfd << "|lendo de <" << connfd << "|" << itr->second << ">" << endl;
-
-            //cout << readed << endl;
-            //cout << readed << endl;
-
             if( readed >= 0 ){
 
-                cout << "Mensagem recebida: " << message << endl;
+                cout << "<" << connAddress[indexClient(connfd)].first << "|" << connAddress[indexClient(connfd)].second << "> Mensagem recebida: " << message << endl;
 
                 if( strcmp(message, "") != 0 ){
-
-                    cout << "Vamos verificar: " << message << endl;
                     
                     if( find(message, (char*)"/nickname ") ){
 
@@ -340,10 +309,6 @@ void *messageThread( void *vargp ){
                             stpcpy(message, messageTool.c_str());
 
                             acknowledgementFull(message);
-
-                            cout << "voltamos ao loop" << endl;
-
-                            //usleep(10000);
 
                             messageTool.clear();
                             messageTool.append("/nickname ").append(connAddress[ indexClient(connfd) ].second);
@@ -399,12 +364,6 @@ void *messageThread( void *vargp ){
                         
                     }else if (strcmp(message, "/ack") != 0){
 
-                        cout << connfd << endl;
-                        cout << connAddress[indexClient(connfd)].second << endl;
-                        cout << message << endl;
-
-                        //printf("Message Received from <%d|%s>: %s\n", connfd, connAddress[indexClient(connfd)].second.c_str() , message);
-
                         messageTool.clear();
                         messageTool.append("<").append(connAddress[indexClient(connfd)].second).append(">:");
 
@@ -415,14 +374,10 @@ void *messageThread( void *vargp ){
 
                         for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
-                            cout << "enviando para " << itr->first << "|" << itr->second << endl;
-
                             if( (int) itr->first != connfd )
                                 write(itr->first, message, sizeof(message));
 
                         }
-
-                        cout << "enviou" << endl;
 
                     }
 
@@ -430,17 +385,14 @@ void *messageThread( void *vargp ){
 
                 stpcpy(message, "");
 
-
             }
 
         }
 
-        cout << "abrindo o mutex da mensagem" << endl;
-
         pthread_mutex_unlock(&mtx);
         sem_post(&semaphore);
 
-        usleep(100000);
+        usleep(1000);
 
     } 
 
@@ -448,33 +400,7 @@ void *messageThread( void *vargp ){
 
 }
 
-void *quitThread( void *vargp ){
-
-    while(running){
-
-        char input = '.';
-
-        while( true ){
-
-            scanf("%c", &input);
-
-            if( input == '/' ){
-
-                running = false;
-                break;
-
-            }
-
-        }
-
-        running = false;
-
-    }
-
-    return nullptr;
-
-}
-
+// funcao principal do servidor
 int main(){
 
     signal(SIGINT, SIG_IGN);
@@ -533,14 +459,18 @@ int main(){
     pthread_t thread_id_quit;
 
     if(sem_init(&semaphore, 0, 1) != 0){
-        cout << "erro ao inicializar o semaforo" << endl;
+        cout << "Semaphore error..." << endl;
         exit(0);
     }
 
     if(pthread_mutex_init(&mtx, nullptr) != 0){
-        cout << "erro ao iniciar o mutex" << endl;
+        cout << "Mutex error..." << endl;
         exit(0);
     }
+
+    cout << endl << "To close the server, send '/' " << endl << endl;
+
+    cout << "Server Online!" << endl;
 
     pthread_create(&thread_id_server, NULL, serverAccept, NULL);
     pthread_create(&thread_id_message, NULL, messageThread, NULL);
