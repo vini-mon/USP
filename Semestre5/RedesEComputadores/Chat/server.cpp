@@ -50,8 +50,6 @@ bool find(string command, char* find){
 
     }
 
-    cout << "find" << endl;
-
     return true;
 
 }
@@ -87,75 +85,17 @@ int indexClient(int find){
 
 }
 
-// thread de configuração de conexão com o cliente
-void *serverAccept( void *vargp ){
-
-    int connfdAccepted = 0;
-
-    char message[100] = "";
-    string messageTool = "";
-
-    while(running){
-
-        cout << "Waiting for connection..." << endl;
-
-        connfdAccepted = accept(sockfd, (SA*)NULL, NULL);
-
-        if( connfdAccepted ){
-
-            cout << "** Tentando fechar mutex da CONEXAO" << endl;
-
-            sem_wait(&semaphore);
-            pthread_mutex_lock(&mtx);
-
-            cout << "Fechado para conexao" << endl;
-
-            connAddress.push_back( make_pair(connfdAccepted, to_string(connfdAccepted) ) );
-
-            printf("server accepted a new connection <%d>\n", connfdAccepted);
-
-            messageTool.clear();
-            messageTool.append("<server>:Cliente ").append(to_string(connfdAccepted)).append(" se conectou\n");
-
-            strcpy(message, messageTool.c_str());
-
-            for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
-
-                cout << itr->first << "|" << itr->second << endl;
-
-                if( itr->first != connfdAccepted )
-                    write(itr->first, message, sizeof(message));
-
-            }
-
-            strcpy(message, "<server>:Você está conectado\n");
-            write(connfdAccepted, message, sizeof(message));
-
-            cout << "abrindo o mutex da conexaoooo" << endl;
-            
-            pthread_mutex_unlock(&mtx);
-            sem_post(&semaphore);
-
-            cout << "tudo aberto" << endl;
-
-        }
-
-        usleep(1000);
-
-    }
-
-    return nullptr;
-
-}
 
 // funcao que verifica se todos os clientes receberam a mensagem enviada. Depois de 5 tentativas falhas, o servidor fecha a conexao com o cliente
-void acknowledgementFull( char* message ){
+void acknowledgementFull( int connfd, char* message ){
 
     for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
         int attempts = 0;
 
         for( attempts = 0 ; attempts < 5 ; attempts++ ){
+
+            if( itr->first == connfd ) break;
 
             write(itr->first, message, MAX);
 
@@ -181,8 +121,7 @@ void acknowledgementFull( char* message ){
         }
 
         if( attempts == 5 ){
-            cout << "No response of " << itr->first << endl;
-            cout << "Closing connection" << endl;
+            cout << "No response of " << itr->first << ". Closing connection" << endl;
             itr->first = -1;
         }else{
             //cout << "Ack response of " << itr->first << endl;
@@ -244,6 +183,63 @@ void acknowledgementSingle( int connfd, char* message ){
 
 }
 
+// thread de configuração de conexão com o cliente
+void *serverAccept( void *vargp ){
+
+    int connfdAccepted = 0;
+
+    char message[100] = "";
+    string messageTool = "";
+
+    while(running){
+
+        connfdAccepted = accept(sockfd, (SA*)NULL, NULL);
+
+        if( connfdAccepted ){
+
+            sem_wait(&semaphore);
+            pthread_mutex_lock(&mtx);
+
+            connAddress.push_back( make_pair(connfdAccepted, to_string(connfdAccepted) ) );
+
+            printf("server accepted a new connection <%d>\n", connfdAccepted);
+
+            messageTool.clear();
+            messageTool.append("\n<server>:Cliente ").append(to_string(connfdAccepted)).append(" se conectou\n");
+
+            strcpy(message, messageTool.c_str());
+
+            for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+                cout << itr->first << "|" << itr->second << endl;
+
+                if( itr->first != connfdAccepted )
+                    acknowledgementFull(connfdAccepted, message);
+
+
+            }
+
+            strcpy(message, "\n<server>:Você está conectado\n");
+            acknowledgementSingle(connfdAccepted, message);
+
+            //cout << "abrindo o mutex da conexaoooo" << endl;
+            
+            pthread_mutex_unlock(&mtx);
+            sem_post(&semaphore);
+
+            //cout << "tudo aberto" << endl;
+
+        }
+
+        usleep(1000);
+
+    }
+
+    return nullptr;
+
+}
+
+
 // thread de recebimento, envio e redirecionamento de mensagens dos clientes
 void *messageThread( void *vargp ){
 
@@ -273,9 +269,13 @@ void *messageThread( void *vargp ){
 
             if( readed >= 0 ){
 
-                cout << "<" << connAddress[indexClient(connfd)].first << "|" << connAddress[indexClient(connfd)].second << "> Mensagem recebida: " << message << endl;
-
                 if( strcmp(message, "") != 0 ){
+
+                    if( strcmp (message, "/ack") != 0 ){
+
+                        cout << "<" << connAddress[indexClient(connfd)].first << "|" << connAddress[indexClient(connfd)].second << "> Mensagem recebida: " << message << endl;
+
+                    }
                     
                     if( find(message, (char*)"/nickname ") ){
 
@@ -299,13 +299,13 @@ void *messageThread( void *vargp ){
                             connAddress[ indexClient(connfd) ].second = validNickname;
 
                             messageTool.clear();
-                            messageTool.append("<server>: <").append(to_string(connfd)).append("> mudou seu nome para: ").append(connAddress[ indexClient(connfd) ].second).append("\n");
+                            messageTool.append("\n<server>: <").append(to_string(connfd)).append("> mudou seu nome para: ").append(connAddress[ indexClient(connfd) ].second).append("\n");
 
                             cout << messageTool << endl;
 
                             stpcpy(message, messageTool.c_str());
 
-                            acknowledgementFull(message);
+                            acknowledgementFull(connfd, message);
 
                             messageTool.clear();
                             messageTool.append("/nickname ").append(connAddress[ indexClient(connfd) ].second);
@@ -316,7 +316,7 @@ void *messageThread( void *vargp ){
                         }else{
 
                             messageTool.clear();
-                            messageTool.append("<server>: este apelido já está em uso.\n");
+                            messageTool.append("\n<server>: este apelido já está em uso.\n");
 
                             stpcpy(message, messageTool.c_str());
 
@@ -334,23 +334,23 @@ void *messageThread( void *vargp ){
 
                                 acknowledgementSingle(connfd, message);
 
+                                messageTool.clear();
+                                messageTool.append("\n<server>:Cliente ").append(to_string(connfd)).append(" saiu\n");
+
+                                strcpy(message, messageTool.c_str());
+
+                                acknowledgementFull(connfd, message);
+
+                                cout << connfd << " has left the chat" << endl;
+
+                                close(connfd);
+
                                 itr->first = -1;
                                 break;
 
                             }
 
                         }
-
-                        messageTool.clear();
-                        messageTool.append("<server>:Cliente ").append(to_string(connfd)).append(" saiu\n");
-
-                        strcpy(message, messageTool.c_str());
-
-                        acknowledgementFull(message);
-
-                        //close(connfd);
-
-                        cout << connfd << " has left the chat" << endl;
                         
                     }else if (strcmp(message, "/ping") == 0) {
 
@@ -372,7 +372,7 @@ void *messageThread( void *vargp ){
                         for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
 
                             if( (int) itr->first != connfd )
-                                write(itr->first, message, sizeof(message));
+                                acknowledgementFull(connfd, message);
 
                         }
 
@@ -392,6 +392,36 @@ void *messageThread( void *vargp ){
         usleep(1000);
 
     } 
+
+    return nullptr;
+
+}
+
+void *clientThread( void* vargp ){
+
+    while( running ){
+
+        sem_wait(&semaphore);
+        pthread_mutex_lock(&mtx);
+
+        for( auto itr = connAddress.begin() ; itr != connAddress.end() ; itr++ ){
+
+            if( itr->first == -1 ){
+
+                connAddress.erase(itr);
+
+                if( connAddress.empty() ) break;
+
+            }
+
+        }
+
+        pthread_mutex_unlock(&mtx);
+        sem_post(&semaphore);
+
+        usleep(5000);
+
+    }
 
     return nullptr;
 
@@ -453,6 +483,7 @@ int main(){
 
     pthread_t thread_id_server;
     pthread_t thread_id_message;
+    pthread_t thread_id_client;
 
     if(sem_init(&semaphore, 0, 1) != 0){
         cout << "Semaphore error..." << endl;
@@ -470,6 +501,7 @@ int main(){
 
     pthread_create(&thread_id_server, NULL, serverAccept, NULL);
     pthread_create(&thread_id_message, NULL, messageThread, NULL);
+    pthread_create(&thread_id_client, NULL, clientThread, NULL);
 
     char input = '.';
 
