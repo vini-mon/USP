@@ -162,14 +162,13 @@ void acknowledgementFull( char* message ){
             usleep(5000);
 
             int lenAck = 0;
-            int readedAck = -1;
             char ack[MAX] = "";
 
             ioctl(itr->first, FIONREAD, &lenAck);
 
             if (lenAck > 0) {
 
-                readedAck = (read(itr->first, ack, MAX));
+                read(itr->first, ack, MAX);
 
                 if( find(ack, (char*)"/ack") ){
 
@@ -211,14 +210,13 @@ void acknowledgementSingle( int connfd, char* message ){
                 usleep(5000);
 
                 int lenAck = 0;
-                int readedAck = -1;
                 char ack[MAX] = "";
 
                 ioctl(itr->first, FIONREAD, &lenAck);
 
                 if (lenAck > 0) {
 
-                    readedAck = (read(itr->first, ack, MAX));
+                    read(itr->first, ack, MAX);
 
                     if( find(ack, (char*)"/ack") ){
 
@@ -251,7 +249,6 @@ void *messageThread( void *vargp ){
 
     int connfd;
     char message[MAX+1] = "";
-    char ack[MAX] = "";
     string messageTool = "";
 
     while(running){
@@ -456,7 +453,6 @@ int main(){
 
     pthread_t thread_id_server;
     pthread_t thread_id_message;
-    pthread_t thread_id_quit;
 
     if(sem_init(&semaphore, 0, 1) != 0){
         cout << "Semaphore error..." << endl;

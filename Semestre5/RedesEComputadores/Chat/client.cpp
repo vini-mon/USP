@@ -35,7 +35,7 @@ bool find(string command, char* find){
 
     if( strlen(find) > command.length() ) return false;
 
-    for( int i = 0 ; i < strlen(find) ; i++ ){
+    for( int i = 0 ; i < (int) strlen(find) ; i++ ){
 
         if( command[i] != find[i] ) return false;
 
@@ -51,7 +51,7 @@ char* extract( string command, int position ){
     int start = 0;
     char* extract = new char[50];
 
-    for( int i = position ; i < command.length() ; i++ ){
+    for( int i = position ; i < (int) command.length() ; i++ ){
 
         extract[start++] = command[i];
 
@@ -156,10 +156,6 @@ void *sendThread( void *vargp ){
 
         }else if( find(buff, (char*)"/nickname ") ){
 
-            char* validNickname = new char[50];
-            
-            validNickname = extract(buff, 10);
-
             bzero(sendMessage, sizeof(sendMessage));
             strcpy(sendMessage, buff);
 
@@ -169,7 +165,7 @@ void *sendThread( void *vargp ){
 
             int ctrl = 0;
 
-            for( int i = 0 ; i < strlen(buff); i++ ){
+            for( int i = 0 ; i < (int) strlen(buff); i++ ){
 
                 sendMessage[ctrl] = buff[i];
 
@@ -185,7 +181,7 @@ void *sendThread( void *vargp ){
 
                     i--;
 
-                }else if( i == strlen(buff)-1 ){
+                }else if( i == (int) strlen(buff)-1 ){
 
                     sendMessage[MAX-1] = '\0';
 
@@ -213,7 +209,7 @@ int main(){
 
     signal(SIGINT, SIG_IGN);
     
-    struct sockaddr_in servaddr, cli;
+    struct sockaddr_in servaddr;
    
     // socket create and verification
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -237,7 +233,6 @@ int main(){
 
     pthread_t thread_id_receive;
     pthread_t thread_id_send;
-    pthread_t thread_id_teste;
 
     cout << "To start a connection to the server, send '/connect' " << endl;
 
