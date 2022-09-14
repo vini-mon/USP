@@ -1,0 +1,14 @@
+digraph {
+	graph [fontname=Arial, nodesep=0.125, ranksep=0.25];
+	node [fontcolor=white, fontname=Arial, height=0, shape=box, style=filled, width=0];
+	edge [fontname=Arial];
+	1 [color="#ff0000", fontcolor="#ffffff", fontsize="10.00", label="main\n100.00%\n(0.00%)"];
+	1 -> 2 [arrowsize="0.71", color="#0eb709", fontcolor="#0eb709", fontsize="10.00", label="50.67%\n1×", labeldistance="2.03", penwidth="2.03"];
+	1 -> 3 [arrowsize="0.70", color="#0ab50e", fontcolor="#0ab50e", fontsize="10.00", label="49.33%\n1×", labeldistance="1.97", penwidth="1.97"];
+	2 [color="#0eb709", fontcolor="#ffffff", fontsize="10.00", label="test\n50.67%\n(2.67%)\n1×"];
+	2 -> 4 [arrowsize="0.69", color="#0ab317", fontcolor="#0ab317", fontsize="10.00", label="48.00%\n1×", labeldistance="1.92", penwidth="1.92"];
+	3 [color="#0ab50e", fontcolor="#ffffff", fontsize="10.00", label="some_other_test\n49.33%\n(49.33%)\n1×"];
+	4 [color="#0ab317", fontcolor="#ffffff", fontsize="10.00", label="another_test\n48.00%\n(0.00%)\n1×"];
+	4 -> 5 [arrowsize="0.69", color="#0ab317", fontcolor="#0ab317", fontsize="10.00", label="48.00%\n1×", labeldistance="1.92", penwidth="1.92"];
+	5 [color="#0ab317", fontcolor="#ffffff", fontsize="10.00", label="yet_another_test\n48.00%\n(48.00%)\n1×"];
+}

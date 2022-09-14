@@ -1,0 +1,5 @@
+gcc -o exemplo exemplo.c -pg
+./exemplo
+gprof exemplo gmon.out > saida_exemplo.txt
+python gprof2dot.py saida_exemplo.txt > saida_exemplo.do
+dot -Tpng -o saida_grafo.png saida_exemplo.dot
