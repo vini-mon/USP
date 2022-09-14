@@ -1,0 +1,7 @@
+%soma (Lista, TomaTotal).
+
+soma([], 0).
+
+soma([X|Tail], Total):-
+    soma(Tail, SomaAux),
+    Total is X + SomaAux.

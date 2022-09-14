@@ -4,11 +4,14 @@ let max = params.get("max");
 
 const myJson = {max:max}
 
-console.log(max);
+console.log(myJson);
 
-let number = Math.floor(Math.random() * (2 - 0)) + 0;
+if( myJson.max == null ){
 
-urlnumber.innerText = myJson.max;
+    myJson.max = 2;
 
-response.writeHead(200, { 'Content-Type': contentType });
-response.end(content, 'utf-8');
+}
+
+let number = Math.floor(Math.random() * (myJson.max - 0)) + 0;
+
+urlnumber.innerText = number;

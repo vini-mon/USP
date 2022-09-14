@@ -3,84 +3,20 @@ const fs = require('fs');
 const path = require('path');
 const { parse } = require('path');
 
-http.createServer( (request, response) => {
-;
-    console.log('url ', request.url.pathname);
-    //console.log('request ', request);
+function readFile(filePath){
 
-    let filePath = '.' + request.url;
+    //return fs.promises.readFile(filePath);
+    return new Promise( (resolve, rejected) => { 
 
-    //console.log('request ',request);
-
-    console.log(filePath);
-
-    if (filePath == './') {
-
-        filePath = './index.html';
-
-    }else if(filePath == './random'){
-
-        console.log(request.url);
-
-        filePath = './random/random.js';
-
-    }else{
-
-        console.log("error 404");
-
-    }
-
-    const extname = String(path.extname(filePath)).toLowerCase();
-
-    const mimeTypes = {
-
-        '.html': 'text/html',
-        '.js': 'text/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpg',
-        '.gif': 'image/gif',
-        '.svg': 'image/svg+xml',
-        '.wav': 'audio/wav',
-        '.mp4': 'video/mp4',
-        '.woff': 'application/font-woff',
-        '.ttf': 'application/font-ttf',
-        '.eot': 'application/vnd.ms-fontobject',
-        '.otf': 'application/font-otf',
-        '.wasm': 'application/wasm'
-
-    };
-
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
-
-    fs.readFile(filePath, (error, content) => {
-
-        return new Promise( ()=> {
+        fs.readFile(filePath, (error, content) => {
 
             if (error) {
 
-                if(error.code == 'ENOENT') {
-
-                    fs.readFile('./404.html', (error, content) => {
-
-                        response.writeHead(404, { 'Content-Type': 'text/html' });
-                        response.end(content, 'utf-8');
-
-                    });
-
-                }else {
-
-                    response.writeHead(500);
-                    response.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
-
-                }
-
+                rejected(error);
 
             }else {
 
-                response.writeHead(200, { 'Content-Type': contentType });
-                response.end(content, 'utf-8');
+                resolve(content);
 
             }
 
@@ -88,6 +24,99 @@ http.createServer( (request, response) => {
 
     });
 
-}).listen(8125);
+}
+
+
+    http.createServer( async (request, response) => {
+
+
+        let filePath = '.' + request.url;
+
+        console.log(filePath);
+
+        let split = filePath.split('?');
+        let max = 1;
+
+        filePath = split[0];
+
+        if (filePath == './') {
+
+            filePath = './index.html';
+
+        }else if(filePath == './example'){
+
+            filePath = './example/newFile.html';	
+            console.log("file max:",filePath);
+
+        }else if(filePath == './random'){
+
+            filePath = './random/random.html';	
+            console.log("file max:",filePath);
+
+        }else{
+
+            console.log("erro 404:", filePath);
+
+        }
+
+        const extname = String(path.extname(filePath)).toLowerCase();
+
+        console.log("extname:", extname);
+
+        const mimeTypes = {
+
+            '.html': 'text/html',
+            '.js': 'text/javascript',
+            '.css': 'text/css',
+            '.json': 'application/json',
+            '.png': 'image/png',
+            '.jpg': 'image/jpg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.wav': 'audio/wav',
+            '.mp4': 'video/mp4',
+            '.woff': 'application/font-woff',
+            '.ttf': 'application/font-ttf',
+            '.eot': 'application/vnd.ms-fontobject',
+            '.otf': 'application/font-otf',
+            '.wasm': 'application/wasm'
+
+        };
+
+        const contentType = mimeTypes[extname] || 'application/octet-stream';
+
+        try{
+
+            content = await readFile(filePath);
+
+            response.writeHead(200, { 'Content-Type': contentType });
+            response.end(content, 'utf-8');
+        
+        }catch(error){
+
+            if(true || error.code == 'ENOENT') {
+
+                try{ 
+
+                    content = await readFile('./404.html');
+
+                    response.writeHead(404, { 'Content-Type': 'text/html' });
+                    response.end(content, 'utf-8');
+
+                }catch(error){
+
+                    console.log("error:", error);
+
+                    response.writeHead(500);
+                    response.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
+
+                }
+
+            }
+
+        }
+
+    }).listen(8125);
+
 
 console.log('Server running at http://127.0.0.1:8125/');

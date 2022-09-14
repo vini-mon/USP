@@ -1,0 +1,6 @@
+remove(_, [], []).
+remove(X1, [X1|T1], R):-
+    !,
+    remove(X1, T1, R).
+remove(X2, [H2|T2], [H2|R2]):-
+    remove(X2, T2, R2).
