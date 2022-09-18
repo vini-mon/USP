@@ -1,0 +1,9 @@
+temVarinha(hermione).
+temVarinha(harry).
+temVassoura(harry).
+
+jogQuadribol(X):-
+    temVassoura(X).
+
+bruxo(X):-
+    temVassoura(X), temVarinha(X).

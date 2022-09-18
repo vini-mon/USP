@@ -1,0 +1,56 @@
+home('ivo').
+home('gil').
+home('rai').
+home('ary').
+home('noe').
+
+muie('ana').
+muie('bia').
+muie('eva').
+muie('clo').
+muie('lia').
+muie('gal').
+
+pai('ivo', 'eva').
+pai('gil', 'rai').
+pai('gil', 'clo').
+pai('gil', 'ary').
+pai('rai', 'noe').
+pai('ary', 'gal').
+
+mae('ana', 'eva').
+mae('bia', 'rai').
+mae('bia', 'clo').
+mae('bia', 'ary').
+mae('eva', 'noe').
+mae('lia', 'gal').
+
+gerou(X, Y):-
+    pai(X, Y), home(X) ; mae(X, Y), muie(X).
+
+irmaos(X, Y):-
+    pai(P, X), pai(P, Y), mae(M, X), mae(M, Y).
+
+filho(X, Y):-
+    (pai(X, Y) ; mae(X, Y)), home(Y).
+
+filha(X, Y):-
+    (pai(X, Y) ; mae(X, Y)), muie(Y).
+
+avo(X, Y):-
+    pai(X, Genitor) , gerou(Genitor, Y).
+
+avoh(X, Y):-
+    mae(X, Genitor) , gerou(Genitor, Y).
+
+tio(X, Y):-
+    home(X), irmaos(X, Genitor), X \= Genitor, gerou(Genitor, Y).
+
+tia(X, Y):-
+    muie(X), irmaos(X, Genitor), X \= Genitor, gerou(Genitor, Y).
+
+primo(X, Y):-
+    home(X), gerou(GenitorX, X), gerou(GenitorY, Y), irmaos(GenitorX, GenitorY).
+
+prima(X, Y):-
+    muie(X), gerou(GenitorX, X), gerou(GenitorY, Y), irmaos(GenitorX, GenitorY).
