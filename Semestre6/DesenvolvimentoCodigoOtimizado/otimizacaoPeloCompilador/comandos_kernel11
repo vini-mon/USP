@@ -1,0 +1,55 @@
+#!/bin/bash
+#Sem a direitiva SORT
+
+# sem nenhuma otimização
+gcc kernel11-branch_prediction.c -o kernel11-branch_prediction
+sudo perf stat -o cache_branch_prediction.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction
+sudo perf stat -o branch_branch_prediction.out -e branches,branch-misses ./kernel11-branch_prediction
+
+# com todas as otimizações ligadas
+gcc -O3 kernel11-branch_prediction.c -o kernel11-branch_prediction-O3
+sudo perf stat -o cache_branch_prediction-O3.out -e cache-references,cache-missesbranches,branch-misses ./kernel11-branch_prediction-O3
+sudo perf stat -o branch_branch_prediction-O3.out -e branches,branch-misses ./kernel11-branch_prediction-O3 
+
+# com O3 e sem a condição de if-conversion
+gcc -O3 kernel11-branch_prediction.c -fno-if-conversion -o kernel11-branch_prediction-O3-fif
+sudo perf stat -o cache_branch_prediction-O3-fif.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-O3-fif 
+sudo perf stat -o branch_branch_prediction-O3-fif.out -e branches,branch-misses ./kernel11-branch_prediction-O3-fif 
+
+# com O3 e sem a condição de loop-vectorize
+gcc -O3 kernel11-branch_prediction.c -fno-tree-loop-vectorize -o kernel11-branch_prediction-O3-loop
+sudo perf stat -o cache_branch_prediction-O3-loop.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-O3-loop 
+sudo perf stat -o branch_branch_prediction-O3-loop.out -e branches,branch-misses ./kernel11-branch_prediction-O3-loop 
+
+# com O3 e sem a condição de if-conversion e loop-vectorize
+gcc -O3 kernel11-branch_prediction.c -fno-tree-loop-vectorize -fno-if-conversion -o kernel11-branch_prediction-O3-fif-loop
+sudo perf stat -o cache_branch_prediction-O3-fif-loop.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-O3-fif-loop
+sudo perf stat -o branch_branch_prediction-O3-fif-loop.out -e branches,branch-misses ./kernel11-branch_prediction-O3-fif-loop
+
+
+#Com a diretiva SORT
+
+# sem nenhuma otimização
+gcc -DSORT kernel11-branch_prediction.c -o kernel11-branch_prediction-sorted
+sudo perf stat -o cache_branch_prediction-sorted.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-sorted 
+sudo perf stat -o branch_branch_prediction-sorted.out -e branches,branch-misses ./kernel11-branch_prediction-sorted
+
+# com todas as otimizações ligadas
+gcc -O3 -DSORT kernel11-branch_prediction.c -o kernel11-branch_prediction-O3-sorted
+sudo perf stat -o cache_branch_prediction-O3-sorted.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-O3-sorted 
+sudo perf stat -o branch_branch_prediction-O3-sorted.out -e branches,branch-misses ./kernel11-branch_prediction-O3-sorted
+
+# com O3 e sem a condição de if-conversion
+gcc -O3 -DSORT kernel11-branch_prediction.c -fno-if-conversion -o kernel11-branch_prediction-O3-fif-sorted
+sudo perf stat -o cache_branch_prediction-O3-fif-sorted.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-O3-fif-sorted
+sudo perf stat -o branch_branch_prediction-O3-fif-sorted.out -e branches,branch-misses ./kernel11-branch_prediction-O3-fif-sorted
+
+# com O3 e sem a condição de loop-vectorize
+gcc -O3 -DSORT kernel11-branch_prediction.c -fno-tree-loop-vectorize -o kernel11-branch_prediction-O3-loop-sorted
+sudo perf stat -o cache_branch_prediction-O3-loop-sorted.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-O3-loop-sorted
+sudo perf stat -o branch_branch_prediction-O3-loop-sorted.out -e branches,branch-misses ./kernel11-branch_prediction-O3-loop-sorted
+
+# com O3 e sem a condição de if-conversion e loop-vectorize
+gcc -O3 -DSORT kernel11-branch_prediction.c -fno-tree-loop-vectorize -fno-if-conversion -o kernel11-branch_prediction-O3-fif-loop-sorted
+sudo perf stat -o cache_branch_prediction-O3-fif-loop-sorted.out -e cache-references,cache-misses,branches,branch-misses ./kernel11-branch_prediction-O3-fif-loop-sorted
+sudo perf stat -o branch_branch_prediction-O3-fif-loop-sorted.out -e branches,branch-misses ./kernel11-branch_prediction-O3-fif-loop-sorted

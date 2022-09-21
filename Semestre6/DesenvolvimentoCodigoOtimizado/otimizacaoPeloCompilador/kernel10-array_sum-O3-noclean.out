@@ -1,0 +1,11 @@
+Kernel name     : array_sum
+Array datatype  : float
+# of runs       : 500
+Arrays size     : 699050
+Best Rate GB/s  :  46.22
+Avg  Rate GB/s  :  44.25
+Median Rate GB/s:  45.70
+Avg time        :   0.00
+Min time        :   0.00
+Max time        :   0.00
+Product Result  : 0.000000

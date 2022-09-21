@@ -1,0 +1,26 @@
+#!/bin/bash
+rm kernel10-array_sum-O*
+
+gcc -O3 kernel10-array_sum.c -o kernel10-array_sum-O3
+./kernel10-array_sum-O3 > kernel10-array_sum-O3.out
+gcc -O2 kernel10-array_sum.c -o kernel10-array_sum-O2
+./kernel10-array_sum-O2 > kernel10-array_sum-O2.out
+gcc -O1 kernel10-array_sum.c -o kernel10-array_sum-O1
+./kernel10-array_sum-O1 > kernel10-array_sum-O1.out
+gcc -O0 kernel10-array_sum.c -o kernel10-array_sum-O0
+./kernel10-array_sum-O0 > kernel10-array_sum-O0.out
+gcc -Os kernel10-array_sum.c -o kernel10-array_sum-Os
+./kernel10-array_sum-Os > kernel10-array_sum-Os.out
+
+
+gcc -O3 -DNOCLEAN kernel10-array_sum.c -o kernel10-array_sum-O3-noclean
+./kernel10-array_sum-O3-noclean > kernel10-array_sum-O3-noclean.out
+gcc -O2 -DNOCLEAN kernel10-array_sum.c -o kernel10-array_sum-O2-noclean
+./kernel10-array_sum-O2-noclean > kernel10-array_sum-O2-noclean.out
+gcc -O1 -DNOCLEAN kernel10-array_sum.c -o kernel10-array_sum-O1-noclean
+./kernel10-array_sum-O1-noclean > kernel10-array_sum-O1-noclean.out
+gcc -O0 -DNOCLEAN kernel10-array_sum.c -o kernel10-array_sum-O0-noclean
+./kernel10-array_sum-O0-noclean > kernel10-array_sum-O0-noclean.out
+gcc -Os -DNOCLEAN kernel10-array_sum.c -o kernel10-array_sum-Os-noclean
+./kernel10-array_sum-Os-noclean > kernel10-array_sum-Os-noclean.out
+
