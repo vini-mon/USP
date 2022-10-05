@@ -1,0 +1,47 @@
+#
+
+# Código Produto Interno sem vetorização com gcc
+gcc -O3 kernel6-inner_prod.c -o kernel6-inner_prod
+sudo perf stat ./kernel6-inner_prod
+#1.61
+
+# Código Produto Interno sem vetorização com icc
+icx -O3 kernel6-inner_prod.c -o kernel6-inner_prod-icc
+sudo perf stat ./kernel6-inner_prod-icc
+#1,38
+
+
+# Código Produto Interno com vetorização intrínseca com gcc
+gcc -O3 kernel7-inner_prod_vec.c -msse3 -msse -o kernel7-inner_prod_vec
+sudo perf stat ./kernel7-inner_prod_vec
+#1,36
+
+
+# Código Produto Interno com vetorização intrínseca com icc
+icx -O3 kernel7-inner_prod_vec.c -msse3 -o kernel7-inner_prod_vec-icc
+sudo perf stat ./kernel7-inner_prod_vec-icc
+#1,37
+
+
+# Código Soma índice sem vetorização com gcc
+gcc -O3 kernel8-add_index.c -o kernel8-add_index
+sudo perf stat ./kernel8-add_index
+#1,055
+
+
+# Código Soma índice sem vetorização com icc
+icx -O3 kernel8-add_index.c -o kernel8-add_index-icc
+sudo perf stat ./kernel8-add_index-icc
+#1,097
+
+
+# Código Soma índice com vetorização intrínseca com gcc
+gcc -O3 kernel9-add_index_vec.c -msse3 -o kernel9-add_index_vec
+sudo perf stat ./kernel9-add_index_vec
+1,083
+
+
+# Código Soma índice com vetorização intrínseca com icc
+icx -O3 kernel9-add_index_vec.c -msse3 -o kernel9-add_index_vec-icc
+sudo perf stat ./kernel9-add_index_vec-icc
+#1,075
