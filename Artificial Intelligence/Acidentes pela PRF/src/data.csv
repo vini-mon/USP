@@ -1,0 +1,22 @@
+item_base;item_add;support;confidence;lift
+['Pedestre andava na pista'];['Atropelamento de Pedestre'];0.010734988907178129;0.9661835748792269;20.580004713090606
+['Pedestre cruzava a pista fora da faixa'];['Atropelamento de Pedestre'];0.009303657052887711;0.9558823529411764;20.360585545193686
+['Entrada inopinada do pedestre'];['Atropelamento de Pedestre'];0.008838474200243326;0.9536679536679535;20.31341816555231
+['Área urbana sem a presença de local apropriado para a travessia de pedestres'];['Atropelamento de Pedestre'];0.00166392328061261;0.9207920792079208;19.613152016421154
+['Incêndio'];['Sem Vítimas'];0.0174085736778072;0.9605133267522211;5.342323699754716
+['Derramamento de carga'];['Sem Vítimas'];0.0017175982251485006;0.7384615384615385;4.107283541416291
+['Estacionar ou parar em local proibido'];['Colisão traseira'];0.0017712731696843914;0.7674418604651163;4.043157740137269
+['Condutor deixou de manter distância do veículo da frente'];['Colisão traseira'];0.06095684534459314;0.7559352118926115;3.9825366069471055
+['Área urbana sem a presença de local apropriado para a travessia de pedestres', '40.0'];['Atropelamento de Pedestre'];0.00016102483360767194;1.0;21.30030487804878
+['Pedestre cruzava a pista fora da faixa', '465.0'];['Atropelamento de Pedestre'];0.00010734988907178129;1.0;21.30030487804878
+['Pedestre cruzava a pista fora da faixa', '470.0'];['Atropelamento de Pedestre'];0.0002325914263221928;1.0;21.30030487804878
+['Pedestre cruzava a pista fora da faixa', 'Curva'];['Atropelamento de Pedestre'];0.0009482573534674014;1.0;21.30030487804878
+['Área urbana sem a presença de local apropriado para a travessia de pedestres', 'Curva'];['Atropelamento de Pedestre'];0.00017891648178630214;1.0;21.30030487804878
+['316.0', 'Pedestre andava na pista'];['Com Vítimas Fatais'];0.00019680812996493237;0.7333333333333334;10.410837355008043
+['262.0', 'Curva acentuada'];['Tombamento'];0.00014313318542904174;0.8000000000000002;9.45719120135364
+['Nevoeiro/Neblina', 'Pedestre andava na pista'];['Com Vítimas Fatais'];0.0001252415372504115;1.0;14.196596393192786
+['Atropelamento de Pedestre', 'Nevoeiro/Neblina'];['Com Vítimas Fatais'];0.00021469977814356258;0.7499999999999999;10.647447294894587
+['482.0', 'Com Vítimas Fatais'];['Colisão frontal'];0.00010734988907178129;0.7499999999999999;11.1963141025641
+['Com Vítimas Fatais', 'Retorno proibido'];['Colisão transversal'];0.000250483074500823;0.7777777777777778;6.220886599249507
+['Com Vítimas Fatais', 'Conversão proibida'];['Colisão transversal'];0.000572532741716167;0.761904761904762;6.093929729877068
+['Sem Vítimas', 'Animais na Pista'];['Atropelamento de Animal'];0.002755313819509053;0.8324324324324325;52.631576372752846
