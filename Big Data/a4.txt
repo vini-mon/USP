@@ -1,0 +1,26 @@
+
+O exerc´ıcio se refere ao Conceito de arrays em SQL.
+Ele deve usar a base de dados do Censo Brasileiro de 2022, conforme estudado no
+Notebook 4.1-Arrays-Censo22.ipynb de exemplo desta aula, e a tabela
+BRCid_PopCorSexo, carregada no Notebook 1.4-ExploraDS-BRCid_Censo22.ipynb.
+Essa tabela tem dados sobre a popula¸c˜ao segundo a cor e o sexo, mas diferente
+da tabela BRCid_Cid_EducSuperior usada no Notebook-exemplo, ela tem as
+medidas considerando Homens, Mulheres e tamb´em o Total.
+Escreva uma consulta que responda:
+Quais s˜ao as 10 cidades com popula¸c˜ao maior do que 100 mil habitantes mais
+pr´oximas de S~ao Carlos, SP, considerando a distˆancia Manhattan e
+A distribui¸c˜ao s´o de Mulheres,
+A distribui¸c˜ao s´o de Homens,
+S´o a distribui¸c˜ao Total.
+
+A sugest˜ao para a resolu¸c˜ao ´e
+Criar uma nova tabela que tenha como atributos:
+a identifica¸c˜ao da cidade como uma tupla com o Nome e a UF da
+Cidade, e
+um atributo bidimensional com as contagens de homens, mulheres e
+popula¸c˜ao total para cada cor dos habitantes.
+Calcular Enumeradores adequados para as dimens˜oes do atributo
+multidimensional criado.
+Acrescentar `a essa tabela um atributo bidimensional com as propor¸c˜oes de
+cada valor de Cor/Sexo
+Executar as consultas solicitadas.
