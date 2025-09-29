@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processo Eleitoral para Conselhos Municipais - Vitória</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A tab-based navigation system was chosen to structure the application into thematic sections: "Visão Geral", "Processo Eleitoral", "Quem Participa?", and "Exemplo Prático". This design allows users to explore the complex election rules in a non-linear, digestible manner, focusing on one aspect at a time. The user flow starts with a general introduction, moves to a detailed, interactive timeline of the election process, clarifies participant roles with toggleable cards, and concludes with a data visualization for a practical example. This structure was selected to transform a dense, procedural document into an engaging and user-friendly learning tool, prioritizing clarity and user control over a rigid, linear presentation. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: The entire election procedure. Goal: Organize/Inform. Viz/Presentation: Interactive step-by-step timeline built with HTML/Tailwind. Interaction: Click to expand details for each phase. Justification: Breaks down a complex process into manageable, interactive steps, improving comprehension over a static text block. Library/Method: Vanilla JS, HTML/CSS.
+        2. Report Info: Eligibility criteria for candidates and voters. Goal: Compare/Inform. Viz/Presentation: Toggleable content cards. Interaction: Buttons switch between "Candidato" and "Eleitor" views. Justification: Clearly separates and defines the two key roles in the election, preventing confusion and facilitating direct comparison. Library/Method: Vanilla JS, HTML/CSS.
+        3. Report Info: Hypothetical council composition. Goal: Inform/Compare Proportions. Viz/Presentation: Doughnut chart. Interaction: Hover tooltips provide details on each segment. Justification: Visually represents the council's structure far more effectively than text, making the distribution of power immediately apparent. Library/Method: Chart.js/Canvas.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            border-bottom-color: #3b82f6;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+        .step-item {
+            transition: all 0.3s ease;
+        }
+        .step-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .step-item.open .step-details {
+            max-height: 500px; 
+        }
+        .step-item.open .step-arrow {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Democracia em Ação</h1>
+            <p class="mt-2 text-lg text-slate-600">Um guia interativo sobre a eleição de representantes da sociedade civil para Conselhos Municipais em Vitória.</p>
+        </header>
+
+        <nav class="mb-8 border-b border-slate-200">
+            <ul id="main-nav" class="flex flex-wrap -mb-px justify-center text-sm font-medium text-center text-slate-500">
+                <li class="mr-2">
+                    <a data-target="overview" class="nav-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-600 hover:border-slate-300 active">Visão Geral</a>
+                </li>
+                <li class="mr-2">
+                    <a data-target="process" class="nav-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-600 hover:border-slate-300">Processo Eleitoral</a>
+                </li>
+                <li class="mr-2">
+                    <a data-target="participants" class="nav-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-600 hover:border-slate-300">Quem Participa?</a>
+                </li>
+                <li>
+                    <a data-target="example" class="nav-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-600 hover:border-slate-300">Exemplo Prático</a>
+                </li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="overview" class="content-section">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4">O Que São e Para Que Servem os Conselhos?</h2>
+                    <p class="text-slate-600 leading-relaxed mb-4">
+                        Os Conselhos Municipais são espaços fundamentais para o exercício da cidadania e o controle social das políticas públicas. Compostos por representantes do governo e da sociedade civil, eles atuam na formulação, fiscalização e deliberação de estratégias para áreas essenciais como saúde, educação, assistência social e, no nosso exemplo, políticas sobre drogas. A participação da sociedade civil garante que as decisões do poder público reflitam as necessidades e a diversidade da população.
+                    </p>
+                    <p class="text-slate-600 leading-relaxed">
+                        Este guia foca no processo eleitoral para escolher os representantes da sociedade civil. Usaremos como base o <strong class="font-semibold text-slate-700">Conselho Municipal de Políticas sobre Drogas de Vitória (COMAD)</strong>, detalhando as regras e etapas que permitem a cidadãos e organizações ocuparem essas vagas de forma democrática e transparente. Navegue pelas seções para entender cada fase do processo.
+                    </p>
+                </div>
+            </section>
+
+            <section id="process" class="content-section hidden">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">As Etapas da Eleição</h2>
+                    <p class="text-slate-600 mb-6 text-center">Clique em cada etapa para expandir e ver os detalhes do processo.</p>
+                    <div id="timeline" class="space-y-4">
+                        
+                        <div class="step-item border border-slate-200 rounded-lg">
+                            <div class="step-header flex justify-between items-center p-4 cursor-pointer bg-slate-50 hover:bg-slate-100 rounded-t-lg">
+                                <div class="flex items-center">
+                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white font-bold mr-4">1</span>
+                                    <h3 class="font-semibold text-slate-700">Publicação do Edital</h3>
+                                </div>
+                                <span class="step-arrow text-slate-500 transition-transform transform">▼</span>
+                            </div>
+                            <div class="step-details p-4 border-t border-slate-200 bg-white rounded-b-lg">
+                                <p class="text-slate-600">O ponto de partida oficial. A prefeitura, através do Diário Oficial do Município, publica o "Edital de Convocação". Este documento é a lei da eleição e contém todas as informações cruciais: o cronograma completo, o número de vagas por segmento, os critérios para candidatura e para votação, e as regras do dia da eleição.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item border border-slate-200 rounded-lg">
+                            <div class="step-header flex justify-between items-center p-4 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                                <div class="flex items-center">
+                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white font-bold mr-4">2</span>
+                                    <h3 class="font-semibold text-slate-700">Inscrição de Candidatos e Eleitores</h3>
+                                </div>
+                                <span class="step-arrow text-slate-500 transition-transform transform">▼</span>
+                            </div>
+                            <div class="step-details p-4 border-t border-slate-200 bg-white">
+                                <p class="text-slate-600">Durante um período definido no edital, as organizações da sociedade civil interessadas devem se inscrever. Isso envolve apresentar documentos que comprovem sua atuação na área do conselho e sua regularidade jurídica. Tanto as entidades que desejam lançar candidatos (sufrágio passivo) quanto aquelas que desejam apenas votar (sufrágio ativo) precisam se credenciar nesta fase.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step-item border border-slate-200 rounded-lg">
+                            <div class="step-header flex justify-between items-center p-4 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                                <div class="flex items-center">
+                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white font-bold mr-4">3</span>
+                                    <h3 class="font-semibold text-slate-700">Assembleia Geral de Eleição</h3>
+                                </div>
+                                <span class="step-arrow text-slate-500 transition-transform transform">▼</span>
+                            </div>
+                            <div class="step-details p-4 border-t border-slate-200 bg-white">
+                                <p class="text-slate-600">No dia, hora e local marcados no edital, ocorre a assembleia. É um evento público onde os representantes das entidades credenciadas se reúnem. A assembleia começa com a verificação dos credenciados, seguida pela apresentação dos candidatos e suas propostas. É o momento central do processo democrático.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item border border-slate-200 rounded-lg">
+                            <div class="step-header flex justify-between items-center p-4 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                                <div class="flex items-center">
+                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white font-bold mr-4">4</span>
+                                    <h3 class="font-semibold text-slate-700">Votação e Apuração</h3>
+                                </div>
+                                <span class="step-arrow text-slate-500 transition-transform transform">▼</span>
+                            </div>
+                            <div class="step-details p-4 border-t border-slate-200 bg-white">
+                                <p class="text-slate-600">A votação geralmente é secreta, realizada em urnas. Cada representante de entidade votante credenciada tem direito a um voto. A eleição pode ser dividida por segmentos (ex: entidades de assistência, representantes de usuários), onde os eleitores de um segmento votam nos candidatos do mesmo segmento. Após o término da votação, a apuração dos votos é feita publicamente pela comissão eleitoral.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-item border border-slate-200 rounded-lg">
+                            <div class="step-header flex justify-between items-center p-4 cursor-pointer bg-slate-50 hover:bg-slate-100 rounded-b-lg">
+                                <div class="flex items-center">
+                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white font-bold mr-4">5</span>
+                                    <h3 class="font-semibold text-slate-700">Proclamação dos Resultados e Posse</h3>
+                                </div>
+                                <span class="step-arrow text-slate-500 transition-transform transform">▼</span>
+                            </div>
+                            <div class="step-details p-4 border-t border-slate-200 bg-white">
+                                <p class="text-slate-600">Os candidatos mais votados em cada segmento são declarados eleitos para as vagas titulares e suplentes. O resultado final é formalizado em uma ata e publicado no Diário Oficial. A posse dos novos conselheiros ocorre em uma data posterior, marcando o início de seu mandato no conselho.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <section id="participants" class="content-section hidden">
+                 <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">Critérios de Participação</h2>
+                    <p class="text-slate-600 mb-6 text-center">Entenda o que é necessário para votar e para ser candidato na eleição do conselho.</p>
+                    
+                    <div class="mb-4 border-b border-gray-200 flex justify-center">
+                        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="participant-tabs">
+                            <li class="mr-2">
+                                <button class="participant-tab inline-block p-4 border-b-2 rounded-t-lg text-blue-600 border-blue-600" data-target="candidatos">Para ser Candidato (Sufrágio Passivo)</button>
+                            </li>
+                            <li>
+                                <button class="participant-tab inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-target="eleitores">Para Votar (Sufrágio Ativo)</button>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div id="candidatos" class="participant-content">
+                        <h3 class="font-semibold text-xl text-slate-700 mb-3">Requisitos para Candidatura</h3>
+                        <ul class="space-y-3 text-slate-600 list-disc list-inside">
+                            <li>Ser indicado por uma entidade ou organização da sociedade civil legalmente constituída.</li>
+                            <li>A entidade deve ter, no mínimo, <strong>2 anos de existência legal</strong> e atuação comprovada na área de políticas sobre drogas no município de Vitória.</li>
+                            <li>Apresentar toda a documentação da entidade (CNPJ, estatuto social, ata da última eleição da diretoria).</li>
+                            <li>O indivíduo indicado deve ser maior de 18 anos, residir em Vitória e, preferencialmente, ter participação ativa na entidade que o indica.</li>
+                            <li>A entidade não pode ter pendências fiscais ou legais com o poder público.</li>
+                        </ul>
+                    </div>
+
+                    <div id="eleitores" class="participant-content hidden">
+                        <h3 class="font-semibold text-xl text-slate-700 mb-3">Requisitos para Votação</h3>
+                        <ul class="space-y-3 text-slate-600 list-disc list-inside">
+                            <li>Ser o representante legal (ou delegado com procuração) de uma entidade da sociedade civil.</li>
+                            <li>A entidade deve ter realizado o <strong>credenciamento prévio</strong> no prazo estipulado pelo edital.</li>
+                            <li>A entidade deve comprovar atuação na área temática do conselho no município de Vitória por, no mínimo, <strong>1 ano</strong>.</li>
+                            <li>Apresentar a documentação necessária da entidade no ato do credenciamento.</li>
+                            <li>Cada entidade credenciada tem direito a <strong>apenas um voto</strong>, independentemente do número de representantes presentes na assembleia.</li>
+                        </ul>
+                    </div>
+
+                 </div>
+            </section>
+            
+            <section id="example" class="content-section hidden">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2 text-center">Composição do Conselho (COMAD)</h2>
+                    <p class="text-slate-600 mb-6 text-center max-w-2xl mx-auto">
+                        Para ilustrar, veja a divisão paritária de um conselho como o COMAD, que possui 12 membros titulares. A paridade significa que há um número igual de representantes do Poder Público e da Sociedade Civil, garantindo o equilíbrio nas decisões.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="councilChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('#main-nav .nav-link');
+            const sections = document.querySelectorAll('.content-section');
+
+            function showSection(targetId) {
+                sections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            document.getElementById('main-nav').addEventListener('click', (event) => {
+                if (event.target.tagName === 'A' && event.target.dataset.target) {
+                    event.preventDefault();
+                    const targetId = event.target.dataset.target;
+                    showSection(targetId);
+                }
+            });
+
+            const participantTabs = document.querySelectorAll('.participant-tab');
+            const participantContents = document.querySelectorAll('.participant-content');
+
+            document.getElementById('participant-tabs').addEventListener('click', (event) => {
+                 if (event.target.tagName === 'BUTTON' && event.target.dataset.target) {
+                    const targetId = event.target.dataset.target;
+
+                    participantContents.forEach(content => {
+                        content.id === targetId ? content.classList.remove('hidden') : content.classList.add('hidden');
+                    });
+
+                    participantTabs.forEach(tab => {
+                        if (tab.dataset.target === targetId) {
+                            tab.classList.add('text-blue-600', 'border-blue-600');
+                            tab.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+                        } else {
+                            tab.classList.remove('text-blue-600', 'border-blue-600');
+                            tab.classList.add('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+                        }
+                    });
+                 }
+            });
+            
+            const timeline = document.getElementById('timeline');
+            if(timeline) {
+                timeline.addEventListener('click', function(event){
+                    const header = event.target.closest('.step-header');
+                    if (header) {
+                        const item = header.parentElement;
+                        item.classList.toggle('open');
+                    }
+                });
+            }
+
+            const ctx = document.getElementById('councilChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            'Poder Público',
+                            'Entidades de Atendimento',
+                            'Representantes de Usuários/Familiares',
+                            'Conselhos Profissionais',
+                            'Instituições de Ensino Superior'
+                        ],
+                        datasets: [{
+                            label: 'Composição do Conselho',
+                            data: [6, 2, 2, 1, 1],
+                            backgroundColor: [
+                                '#94a3b8',
+                                '#3b82f6',
+                                '#60a5fa',
+                                '#93c5fd',
+                                '#bfdbfe'
+                            ],
+                            borderColor: '#f8fafc',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + ' vagas';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+
+            showSection('overview');
+        });
+    </script>
+</body>
+</html>
